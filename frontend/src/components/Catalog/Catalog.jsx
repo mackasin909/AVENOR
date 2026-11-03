@@ -3,9 +3,9 @@ import styles from "./Catalog.module.scss"
 import { CARS } from "@/data/cars"
 
 export default function Catalog() {
-    const bestOffers = CARS.slice(0, 3)
+    const bestOffers = CARS.slice(6, 9)
     const mostPopular = CARS.slice(3, 6)
-    const newest = CARS.slice(6, 9)
+    const newest = CARS.slice(0, 3)
 
     return (
         <div className={styles.catalog}>

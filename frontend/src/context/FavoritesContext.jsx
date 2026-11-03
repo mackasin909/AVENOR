@@ -1,35 +1,84 @@
 "use client"
-import { createContext, useContext, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { CARS } from "@/data/cars";
 
 export const FavoritesContext = createContext(null)
 
+const STORAGE_KEY = "avenor-favorites"
+
 export function FavoritesProvider({ children }) {
-    const [favoritesArray, setFavoritesArray] = useState([])
+    const [favoriteIds, setFavoriteIds] = useState([])
+    const [isLoaded, setIsLoaded] = useState(false)
 
-    function toggleFavorite(car) {
-        const isFavorite = favoritesArray.some((item) => item.id === car.id);
+    useEffect(() => {
+        try {
+            const saved = JSON.parse(localStorage.getItem(STORAGE_KEY))
 
-        setFavoritesArray((prev) => 
-            prev.some((item) => item.id === car.id)
-                ? prev.filter((item) => item.id !== car.id)
-                : [...prev, car]
+            if (Array.isArray(saved)) {
+                const ids = saved
+                    .map((item) => (typeof item === "object" && item !== null ? item.id : item))
+                    .filter((id) => id !== undefined && id !== null)
+
+                setFavoriteIds([...new Set(ids)])
+            }
+        } catch (error) {
+            console.error("Failed to read favorites", error)
+        }
+        setIsLoaded(true)
+    }, [])
+
+    useEffect(() => {
+        if (!isLoaded) return
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(favoriteIds))
+        } catch (error) {
+            console.error("Failed to save favorites", error)
+        }
+    }, [favoriteIds, isLoaded])
+
+    const toggleFavorite = useCallback((carOrId) => {
+        const id = typeof carOrId === "object" ? carOrId.id : carOrId
+        const isFavorite = favoriteIds.includes(id)
+
+        setFavoriteIds((prev) =>
+            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
         )
 
-        if (isFavorite) {
-            toast.info("Removed from favorites")
-        } else {
-            toast.info("Added to favorites")
-        }
-    }
+        toast.info(isFavorite ? "Removed from favorites" : "Added to favorites")
+    }, [favoriteIds])
+
+    const clearFavorites = useCallback(() => {
+        setFavoriteIds([])
+        toast.info("Favorites cleared")
+    }, [])
+
+    const isFavorite = useCallback((id) => favoriteIds.includes(id), [favoriteIds])
+
+    const favoritesArray = useMemo(
+        () => favoriteIds
+            .map((id) => CARS.find((car) => car.id === id))
+            .filter(Boolean),
+        [favoriteIds]
+    )
 
     return (
         <FavoritesContext.Provider
             value={{
-                toggleFavorite,
+                favoriteIds,
                 favoritesArray,
-                setFavoritesArray,
+                toggleFavorite,
+                clearFavorites,
+                isFavorite,
+                isLoaded,
             }}
         >
             {children}
@@ -39,11 +88,11 @@ export function FavoritesProvider({ children }) {
 }
 
 export default function useFavorites() {
-  const context = useContext(FavoritesContext);
+    const context = useContext(FavoritesContext)
 
-  if (!context) {
-    throw new Error("useFavorites должен использоваться внутри FavoritesProvider");
-  }
+    if (!context) {
+        throw new Error("useFavorites must be used inside FavoritesProvider")
+    }
 
-  return context;
+    return context
 }

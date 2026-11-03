@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import styles from "./Header.module.scss";
 import Link from "next/link";
@@ -58,7 +58,9 @@ export default function Header() {
               </li>
             </ul>
           </nav>
-          <HeaderField />
+          <Suspense fallback={null}>
+            <HeaderField />
+          </Suspense>
           <div className={styles.headerIcons}>
             <Link href="/favorites" className={styles.headerIcon}>
               {favoriteLength == 0 ? null : (<p>{favoriteLength}</p>)}

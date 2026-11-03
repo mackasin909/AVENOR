@@ -17,6 +17,22 @@
     outline: none;
     border: none;
     background-color: transparent;
+
+    &::-webkit-search-cancel-button {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 16px;
+      width: 16px;
+      cursor: pointer;
+      opacity: 0.5;
+      background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2317191B' stroke-width='2.5' stroke-linecap='round'><path d='M18 6 6 18M6 6l12 12'/></svg>")
+        center / contain no-repeat;
+      transition: opacity 0.2s;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
   }
 
   & button{

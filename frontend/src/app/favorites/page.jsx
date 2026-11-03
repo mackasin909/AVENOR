@@ -1,28 +1,57 @@
 "use client";
 
-import CatalogCard from "@/components/CatalogCard/CatalogCard";
-import styles from "./page.module.scss";
-import useFavorites from "@/context/FavoritesContext";
 import Link from "next/link";
+import CatalogCard from "@/components/CatalogCard/CatalogCard";
+import useFavorites from "@/context/FavoritesContext";
+import styles from "./page.module.scss";
 
 export default function FavoritesPage() {
-  const { favoritesArray } = useFavorites();
+  const { favoritesArray, clearFavorites, isLoaded } = useFavorites();
+
+  if (!isLoaded) {
+    return (
+      <div className={styles.favoritesPage}>
+        <div className="container" />
+      </div>
+    );
+  }
+
+  const hasFavorites = favoritesArray.length > 0;
 
   return (
     <div className={styles.favoritesPage}>
       <div className="container">
-        <h2 className={styles.title}>Saved Listings</h2>
+        <div className={styles.header}>
+          <h2 className={styles.title}>
+            Saved Listings
+            {hasFavorites && (
+              <div className={styles.count}><p>{favoritesArray.length}</p></div>
+            )}
+          </h2>
 
-        {favoritesArray.length === 0 ? (
-          <div className={styles.emptyMessage}>
-            <p>You have no saved listings yet</p>
-            <Link className={styles.emptyButton} href="/catalog">Catalog</Link>
-          </div>
-        ) : (
+          {hasFavorites && (
+            <button
+              type="button"
+              className={styles.clearButton}
+              onClick={clearFavorites}
+            >
+              Clear all
+            </button>
+          )}
+        </div>
+
+        {hasFavorites ? (
           <div className="grid">
             {favoritesArray.map((car) => (
               <CatalogCard key={car.id} {...car} />
             ))}
+          </div>
+        ) : (
+          <div className={styles.emptyMessage}>
+            <p>You have no saved listings yet</p>
+            <Link className={styles.emptyButton} href="/catalog">
+              Browse catalog
+            </Link>
           </div>
         )}
       </div>

@@ -32,7 +32,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 200px;
+    width: 280px;
     padding-block: 8px;
     border: none;
     border-top: 1px solid var(--ink);
@@ -90,4 +90,51 @@
         outline: 2px solid var(--surface);
         outline-offset: 5px;
     }
+}
+
+
+
+
+.header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.count {
+  width: 25px;
+  height: 25px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  opacity: 0.7;
+  position: relative;
+
+  & p{
+    font-size: 14px;
+    position: absolute;
+    top: 50%;
+    left: 52%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.clearButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 1;
+  }
 }
