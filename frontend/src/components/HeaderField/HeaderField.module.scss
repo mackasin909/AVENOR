@@ -1,0 +1,28 @@
+.headerField{
+  border-radius: 2px;
+  background-color: var(--surface);
+  border: 1px solid var(--surface);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  column-gap: 15px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+
+  & input{
+    width: 100%;
+    min-width: 380px;
+    font-size: 16px;
+    outline: none;
+    border: none;
+    background-color: transparent;
+  }
+
+  & button{
+    background-color: transparent;
+    border: none;
+    margin-top: 4px;
+    cursor: pointer;
+  }
+}

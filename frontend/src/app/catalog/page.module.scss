@@ -1,0 +1,33 @@
+.catalogPage{
+    margin-top: 100px;
+    padding-bottom: 50px;
+}
+
+.title{
+    font-size: 26px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 600;
+}
+
+.catalogTop{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.filter{
+    font-size: 16px;
+    background-color: transparent;
+    border: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: .2s;
+
+    &:hover{
+        opacity: 0.6;
+    }
+}

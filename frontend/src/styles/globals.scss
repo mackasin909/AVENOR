@@ -1,0 +1,31 @@
+@use "./grid";
+@use "./variables";
+
+html,
+body {
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-manrope), system-ui, sans-serif;
+}
+
+:root{
+  --backgroung: #FAFAF8;
+  --surface: #F0F1EE;
+  --border: #DADDD9;
+  --muted: #747B79;
+  --ink: #17191B;
+}
+
+.home{
+  background-color: var(--backgroung);
+}

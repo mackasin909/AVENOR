@@ -1,0 +1,87 @@
+.carPage {
+  padding-top: 100px;
+}
+
+.carInfo{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    row-gap: 30px;
+}
+
+.infoBlock{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 20px;
+
+  & h4{
+    font-size: 28px;
+    font-weight: 600;
+  }
+}
+
+.infoMain{
+  display: flex;
+  align-items: start;
+  column-gap: 50px;
+}
+
+.block{
+  display: flex;
+  flex-direction: column;
+  row-gap: 5px;
+
+  & h2{
+    font-size: 30px;
+    font-weight: 600;
+
+    & span{
+      margin-right: 10px;
+    }
+  }
+
+  & p{
+    font-size: 18px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+}
+
+.stats{
+  display: flex;
+  align-items: center;
+  column-gap: 80px;
+
+  & div{
+    display: flex;
+    flex-direction: column;
+    row-gap: 5px;
+    align-items: start;
+
+    & p{
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    & span{
+      font-size: 18px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+  }
+}
+
+.about h4{
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.about p{
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 25px;
+}
+

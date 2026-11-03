@@ -1,0 +1,142 @@
+.wrapper {
+  display: grid;
+  position: relative;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+
+  height: clamp(320px, 35vw, 520px);
+  border-radius: 12px;
+  overflow: hidden;
+
+  & img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    cursor: pointer;
+
+    object-fit: cover;
+    object-position: center;
+  }
+  margin-bottom: 15px;
+}
+
+.mainImage {
+  min-width: 0;
+  min-height: 0;
+}
+
+.imagesBlock {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+
+  min-width: 0;
+  min-height: 0;
+}
+
+@media (max-width: 767px) {
+  .wrapper {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .mainImage {
+    aspect-ratio: 4 / 3;
+  }
+
+  .imagesBlock {
+    grid-template-rows: repeat(2, auto);
+
+    & img {
+      aspect-ratio: 4 / 3;
+    }
+  }
+}
+
+.buttonBlock{
+    position: absolute;
+    bottom: 25px;
+    left: 25px;
+    display: flex;
+    align-items: center;
+    column-gap: 8px;
+
+    & button{
+        display: flex;
+        align-items: center;
+        column-gap: 15px;
+        padding: 10px 20px;
+        border: none;
+        font-size: 16px;
+        font-weight: 500;
+        letter-spacing: 1.8px;
+        background-color: var(--backgroung);
+        border-radius: 50px;
+        cursor: pointer;
+        transition: .2s;
+
+        &:last-child svg{
+            transform: rotate(180deg);
+        }
+
+        &:hover{
+            background-color: var(--border);
+        }
+    }
+}
+
+.imageButton {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: zoom-in;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.8);
+  cursor: zoom-out;
+  box-sizing: border-box;
+}
+
+.fullImage {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: calc(100dvh - 48px);
+  border-radius: 15px;
+  object-fit: contain;
+  cursor: default;
+}
+
+.closeButton {
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: white;
+  font-size: 44px;
+  line-height: 1;
+  cursor: pointer;
+}

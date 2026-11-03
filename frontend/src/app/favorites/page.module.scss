@@ -1,0 +1,93 @@
+.favoritesPage{
+    padding-top: 100px;
+}
+
+.title{
+    font-size: 26px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 600;
+    margin-bottom: 30px;
+}
+
+.emptyMessage{
+    display: flex;
+    row-gap: 8px;
+    flex-direction: column;
+    align-items: center;
+
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    & p{
+        font-size: 20px;
+        font-weight: 400;
+    }        
+}
+
+.emptyButton{
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 200px;
+    padding-block: 8px;
+    border: none;
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    background-color: transparent;
+    position: absolute;
+    top: 200%;
+
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--ink);
+    cursor: pointer;
+
+    opacity: calc(1 - var(--exit));
+
+    isolation: isolate;
+    overflow: hidden;
+
+    &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background-color: var(--ink);
+        border-color: var(--ink);
+
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform .5s ease;
+    }
+
+    transform:
+        translateX(-50%)
+        translateY(calc(var(--exit) * 110px));
+
+    transition:
+        background-color 1s ease,
+        color 0.5s ease,
+        border-color 0.4s ease;
+
+
+    &:hover,
+        &:focus-visible {
+            color: var(--surface);
+
+            &::before {
+                transform: scaleX(1);
+            }
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--surface);
+        outline-offset: 5px;
+    }
+}
