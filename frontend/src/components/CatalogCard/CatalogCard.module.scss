@@ -7,6 +7,7 @@
   overflow: hidden;
   position: relative;
   text-decoration: none;
+  border-radius: 10px;
 }
 
 .gallery {
@@ -21,7 +22,7 @@
 
 .imageWrapper {
   display: block;
-  height: 280px;
+  height: 220px;
   overflow: hidden;
 
   & img {

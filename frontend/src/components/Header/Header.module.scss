@@ -7,16 +7,15 @@
 
   opacity: 1;
   visibility: visible;
-  transform: translateY(0);
+  transform: none;
 
   transition:
     opacity 0.3s ease,
-    transform .8s ease,
+    transform 0.8s ease,
     visibility 0.3s ease;
 
-  background-color: var(--backgroung) !important;
+  background-color: var(--backgroung);
   border-bottom: 1px solid var(--border);
-  box-shadow: 0 4px 4px 0 var(--border);
 }
 
 .hidden {
@@ -26,75 +25,113 @@
   transform: translateY(-100%);
 }
 
-.logo{
+.logo {
+  display: block;
   max-width: 200px;
   cursor: pointer;
 }
 
-.headerWrapper{
+.headerWrapper {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.headerList{
+.headerList {
+  margin: 0;
+  padding: 0;
   list-style: none;
 }
 
-.headerNav{
+.headerNav {
   display: flex;
   align-items: center;
   column-gap: 65px;
 }
 
-.headerLink{
+.headerLink {
   text-decoration: none;
   color: var(--ink);
   font-weight: 600;
   font-size: 16px;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  transition: .2s;
+  transition: opacity 0.2s ease;
 
-  &:hover{
-    opacity: .7;
+  &:hover {
+    opacity: 0.7;
   }
 }
 
-.headerIcons{
+.headerIcons {
   display: flex;
   align-items: center;
-  column-gap: 20px;
+  column-gap: 25px;
 }
 
-.headerIcon{
+.headerIcon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+
   background-color: transparent;
   border: none;
   cursor: pointer;
-  transition: .2s;
-  position: relative;
+  transition: transform 0.2s ease;
 
-  & p{
+  p {
     position: absolute;
     top: -10px;
     right: -12px;
-    background-color: var(--ink);
+    margin: 0;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     width: 20px;
     height: 20px;
     font-size: 12px;
-    border-radius: 50px;
+    border-radius: 50%;
+    background-color: var(--ink);
     color: var(--surface);
   }
 
-  & svg{
+  svg {
     width: 25px;
     height: 25px;
   }
 
-  &:active{
+  &:active {
     transform: scale(0.9);
   }
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  background-color: rgba(51, 51, 51, 0.5);
+
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
+
+  &.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+}
+
+.authOverlay {
+  z-index: 3;
 }

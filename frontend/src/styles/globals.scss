@@ -4,6 +4,7 @@
 html,
 body {
   scrollbar-width: none;
+  background-color: var(--backgroung);
 }
 
 html::-webkit-scrollbar,
@@ -24,8 +25,4 @@ body::-webkit-scrollbar {
   --border: #DADDD9;
   --muted: #747B79;
   --ink: #17191B;
-}
-
-.home{
-  background-color: var(--backgroung);
 }

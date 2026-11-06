@@ -1,69 +1,47 @@
-import CatalogCard from "../CatalogCard/CatalogCard"
-import styles from "./Catalog.module.scss"
-import { CARS } from "@/data/cars"
+import FilterPanel from "@/components/CatalogFilter/FilterPanel";
+import { CARS } from "@/data/cars";
+import { searchCars } from "@/lib/searchCars";
+import CatalogResults from "./CatalogResults";
+import styles from "./Catalog.module.scss";
 
-export default function Catalog() {
-    const bestOffers = CARS.slice(6, 9)
-    const mostPopular = CARS.slice(3, 6)
-    const newest = CARS.slice(0, 3)
+function getBounds(values) {
+  const numbers = values.filter(Number.isFinite);
 
-    return (
-        <div className={styles.catalog}>
-            <div className="container">
-                <h1 className={styles.title}>Best offers</h1>
+  if (numbers.length === 0) return null;
 
-                <div className={`grid ${styles.catalogContainer}`}>
-                    {bestOffers.map((car) => {
-                        return (
-                            <CatalogCard
-                                key={car.id}
-                                id={car.id}
-                                year={car.year}
-                                location={car.location}
-                                images={car.images}
-                                name={car.name}
-                                price={car.price}
-                            />
-                        )
-                    })}
-                </div>
+  return {
+    min: Math.min(...numbers),
+    max: Math.max(...numbers),
+  };
+}
 
-                <h1 className={styles.title}>Most popular</h1>
+export default async function Catalog({ searchParams }) {
+  const params = (await searchParams) ?? {};
+  const query = typeof params.search === "string" ? params.search : "";
+  const result = searchCars(CARS, query);
 
-                <div className={`grid ${styles.catalogContainer}`}>
-                    {mostPopular.map((car) => {
-                        return (
-                            <CatalogCard
-                                key={car.id}
-                                id={car.id}
-                                year={car.year}
-                                location={car.location}
-                                images={car.images}
-                                name={car.name}
-                                price={car.price}
-                            />
-                        )
-                    })}
-                </div>
+  const filterCars = CARS.map(({ brand, model, location }) => ({
+    brand,
+    model,
+    country: location.split(",").at(-1).trim(),
+  }));
 
-                <h1 className={styles.title}>The newest</h1>
+  const priceBounds = getBounds(CARS.map((car) => car.price));
+  const mileageBounds = getBounds(CARS.map((car) => car.milage));
 
-                <div className={`grid ${styles.catalogContainer}`}>
-                    {newest.map((car) => {
-                        return (
-                            <CatalogCard
-                                key={car.id}
-                                id={car.id}
-                                year={car.year}
-                                location={car.location}
-                                images={car.images}
-                                name={car.name}
-                                price={car.price}
-                            />
-                        )
-                    })}
-                </div>
-            </div>
+  return (
+    <div id="catalog" className={styles.catalog}>
+      <div className="container">
+        <div className={styles.catalogWrapper}>
+          <FilterPanel
+            cars={filterCars}
+            priceBounds={priceBounds}
+            mileageBounds={mileageBounds}
+          />
+
+          <CatalogResults cars={result} query={query} />
         </div>
-    )
+      </div>
+    </div>
+  );
 }

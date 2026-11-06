@@ -49,7 +49,7 @@ export default function FavoritesPage() {
         ) : (
           <div className={styles.emptyMessage}>
             <p>You have no saved listings yet</p>
-            <Link className={styles.emptyButton} href="/catalog">
+            <Link className={styles.emptyButton} href="/">
               Browse catalog
             </Link>
           </div>

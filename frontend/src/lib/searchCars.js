@@ -5,13 +5,15 @@ export function searchCars(cars, query) {
 
   return cars.filter((car) => {
     const haystack = [
-      car.name,
+      car.brand,
+      car.model,
       car.year,
       car.location,
       car.fuelType,
       car.engine,
       car.gearbox,
     ]
+      .filter(Boolean)
       .join(" ")
       .toLowerCase();
 
