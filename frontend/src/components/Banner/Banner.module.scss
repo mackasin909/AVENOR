@@ -1,42 +1,408 @@
-.banner{
-    margin-top: 68px;
+.banner {
+    --banner-bg: #f7f5f4;
+    --slide-height: 210px;
+
     width: 100%;
-    // min-height: 350px;
-    margin-bottom: 50px;
+    margin: 68px 0 40px;
 }
 
-.bannerWrapper{
-    padding-top: 50px;
+.bannerWrapper {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.6fr);
+    align-items: start;
+    gap: 24px;
+}
+
+.bannerInfo {
+    min-width: 0;
+    padding-top: 34px;
+    color: var(--ink, #111);
+
+    h1 {
+        margin: 16px 0 10px;
+        font-size: clamp(28px, 2.5vw, 46px);
+        font-weight: 500;
+        line-height: 1.15;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+    }
+
+    > p {
+        margin: 0;
+        color: var(--muted, #969190);
+        font-size: 15px;
+        font-style: italic;
+        line-height: 1.6;
+        letter-spacing: 0.7px;
+    }
+}
+
+.eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+
+    &::after {
+        content: "";
+        flex: 0 0 65px;
+        height: 1px;
+        background: #dedbd8;
+    }
+}
+
+.sliderWrapper {
+    min-width: 0;
+}
+
+.sliderViewport {
+    position: relative;
+    height: var(--slide-height);
+    isolation: isolate;
+
+    &::after {
+        content: "";
+        position: absolute;
+        inset: 0 0 0 auto;
+        z-index: 2;
+        width: 70px;
+        background: linear-gradient(
+            to right,
+            transparent,
+            var(--banner-bg)
+        );
+        pointer-events: none;
+    }
+}
+
+.slider {
+    width: 100%;
+    height: 100%;
+}
+
+.slideItem {
+    height: 100%;
+    opacity: 0.5;
+    transition: opacity 500ms ease;
+
+    &:global(.swiper-slide-active) {
+        opacity: 1;
+    }
+}
+
+.slide {
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 15px;
+    background: #171717;
+    color: #fff;
+}
+
+.imageArea {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    isolation: isolate;
+
+    &::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        background: linear-gradient(
+            90deg,
+            rgb(23 23 23 / 80%) 0%,
+            rgb(23 23 23 / 55%) 30%,
+            rgb(23 23 23 / 15%) 55%,
+            transparent 75%
+        );
+        pointer-events: none;
+    }
+}
+
+// Размытый фон заполняет весь слайд, включая область текста.
+.imageBackdrop {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    filter: blur(18px) brightness(0.8);
+    transform: scale(1.12);
+}
+
+// Чёткое фото справа с плавным переходом в размытый фон.
+.slideImage {
+    position: absolute;
+    inset: 0 0 0 auto;
+    z-index: 1;
+    display: block;
+    width: 65%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+
+    -webkit-mask-image: linear-gradient(
+        90deg,
+        transparent 0%,
+        #000 22%
+    );
+    mask-image: linear-gradient(
+        90deg,
+        transparent 0%,
+        #000 22%
+    );
+}
+
+.slideContent {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
-    row-gap: 15px;
+    align-items: flex-start;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 65%;
+    height: 100%;
+    padding: 20px 12px 20px 60px;
 
-    & span{
-        display: flex;
-        align-items: center;
-        column-gap: 10px;
-        font-size: 20px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        color: var(--ink);
+    h2 {
+        margin: 10px 0 6px;
+        font-size: clamp(18px, 1.5vw, 24px);
+        font-weight: 500;
+        line-height: 1.2;
+        text-shadow: 0 1px 8px rgb(0 0 0 / 50%);
+    }
 
-        & img{
-            margin-top: 2px;
+    > p {
+        margin: 0;
+        color: rgb(255 255 255 / 78%);
+        font-size: 11px;
+        line-height: 1.5;
+        letter-spacing: 0.5px;
+        text-shadow: 0 1px 6px rgb(0 0 0 / 60%);
+    }
+}
+
+.badge {
+    display: inline-block;
+    padding: 5px 7px;
+    border-radius: 4px;
+    background: #1c2a22;
+    font-size: 8px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+}
+
+.details {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 17px;
+    padding: 7px 16px;
+    border: 1px solid rgb(255 255 255 / 80%);
+    border-radius: 30px;
+    background: rgb(0 0 0 / 15%);
+    color: #fff;
+    font-size: 11px;
+    line-height: 1.3;
+    text-decoration: none;
+    transition: background 200ms ease;
+
+    &:hover {
+        background: rgb(255 255 255 / 18%);
+    }
+}
+
+.controls {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.arrow {
+    position: absolute;
+    top: 50%;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    color: #111;
+    box-shadow: 0 2px 12px rgb(0 0 0 / 12%);
+    transform: translateY(-50%);
+    cursor: pointer;
+    pointer-events: auto;
+    transition: background 200ms ease;
+
+    &:hover {
+        background: #eae7e4;
+    }
+
+    svg {
+        display: block;
+    }
+}
+
+.prev {
+    left: 12px;
+}
+
+.next {
+    right: 12px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 28px;
+}
+
+.dot {
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+
+    &::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #ccc8c5;
+        transition: background 200ms ease;
+    }
+}
+
+.dotActive::before {
+    background: #111;
+}
+
+.arrow,
+.dot,
+.details {
+    &:focus-visible {
+        outline: 2px solid #a39382;
+        outline-offset: 3px;
+    }
+}
+
+@media (max-width: 1100px) {
+    .banner {
+        --slide-height: 240px;
+    }
+
+    .bannerWrapper {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 22px;
+    }
+
+    .bannerInfo {
+        padding-top: 0;
+    }
+}
+
+@media (max-width: 639px) {
+    .banner {
+        --slide-height: 320px;
+
+        margin: 30px 0;
+    }
+
+    .bannerInfo {
+        h1 {
+            font-size: 28px;
+            letter-spacing: 2px;
+        }
+
+        > p {
+            font-size: 14px;
         }
     }
 
-    & h1{
-        font-size: 50px;
-        color: var(--ink);
-        text-transform: uppercase;
-        letter-spacing: 5px;
-        font-weight: 600;
+    .eyebrow {
+        font-size: 10px;
+        letter-spacing: 2px;
+
+        &::after {
+            flex-basis: 40px;
+        }
     }
 
-    & p{
-        font-size: 18px;
-        letter-spacing: 2px;
-        color: var(--muted);
+    .sliderViewport::after {
+        display: none;
+    }
+
+    .imageArea::after {
+        background: linear-gradient(
+            180deg,
+            transparent 20%,
+            rgb(23 23 23 / 35%) 45%,
+            rgb(23 23 23 / 90%) 85%
+        );
+    }
+
+    .slideImage {
+        inset: 0;
+        width: 100%;
+        height: 75%;
+        object-fit: contain;
+        object-position: center;
+
+        -webkit-mask-image: linear-gradient(
+            180deg,
+            #000 65%,
+            transparent
+        );
+        mask-image: linear-gradient(
+            180deg,
+            #000 65%,
+            transparent
+        );
+    }
+
+    .slideContent {
+        justify-content: flex-end;
+        width: 100%;
+        padding: 20px 48px;
+
+        h2 {
+            font-size: 21px;
+        }
+    }
+
+    .details {
+        margin-top: 12px;
+    }
+
+    .prev {
+        left: 8px;
+    }
+
+    .next {
+        right: 8px;
     }
 }
