@@ -135,3 +135,41 @@
 .authOverlay {
   z-index: 3;
 }
+.accountButton {
+  max-width: 160px;
+  color: var(--ink);
+  padding: 6px 14px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--ink);
+    color: var(--surface);
+  }
+}
+
+.username {
+  overflow: hidden;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: inherit;
+}
+
+@media (max-width: 480px) {
+  .accountButton {
+    max-width: 96px;
+    padding: 4px 10px;
+  }
+
+  .username {
+    font-size: 13px;
+  }
+}
