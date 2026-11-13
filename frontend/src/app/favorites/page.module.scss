@@ -138,3 +138,8 @@
     opacity: 1;
   }
 }
+button.emptyButton {
+    font: inherit;
+    color: var(--ink);
+    cursor: pointer;
+}

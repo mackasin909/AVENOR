@@ -2,6 +2,9 @@ import localFont from 'next/font/local';
 import "../styles/globals.scss"
 import Header from '@/components/Header/Header';
 import { FavoritesProvider } from '@/context/FavoritesContext';
+import { SessionProvider } from '@/context/SessionContext';
+import { getCurrentUser } from '@/lib/auth';
+import { getFavoriteIds } from '@/lib/cars';
 
 const manrope = localFont({
   src: [
@@ -22,14 +25,19 @@ export const metadata = {
   description: 'AVENOR — a curated collection of exceptional automobiles.',
 }
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const user = await getCurrentUser();
+  const favoriteIds = user ? await getFavoriteIds(user.id) : [];
+
   return (
     <html lang="en" className={manrope.variable}>
       <body>
-        <FavoritesProvider>
-          <Header />
-          <main data-page-content>{children}</main>
-        </FavoritesProvider>
+        <SessionProvider user={user}>
+          <FavoritesProvider initialIds={favoriteIds}>
+            <Header />
+            <main data-page-content>{children}</main>
+          </FavoritesProvider>
+        </SessionProvider>
       </body>
     </html>
   );

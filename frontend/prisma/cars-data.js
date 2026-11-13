@@ -1,4 +1,4 @@
-const RAW_CARS = [
+export const CARS_DATA = [
   {
     id: 1,
     images: [
@@ -189,8 +189,3 @@ const RAW_CARS = [
       "2016 Audi R8 V10 featuring a naturally aspirated 5.2L V10 engine and a 7-speed S tronic dual-clutch transmission. Quattro all-wheel drive, a mid-engine layout, and a distinctive V10 soundtrack combine everyday usability with supercar excitement.",
   },
 ];
-
-export const CARS = RAW_CARS.map((car) => ({
-  ...car,
-  name: `${car.brand} ${car.model}`,
-}));

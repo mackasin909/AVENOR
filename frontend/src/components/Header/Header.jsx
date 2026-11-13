@@ -14,12 +14,14 @@ import Link from "next/link";
 import styles from "./Header.module.scss";
 import HeaderField from "../HeaderField/HeaderField";
 import useFavorites from "@/context/FavoritesContext";
+import useSession from "@/context/SessionContext";
 import Sign from "../Sign/Sign";
 
 const subscribeNoop = () => () => {};
 
 export default function Header() {
-  const { favoritesArray } = useFavorites();
+  const { favoriteIds } = useFavorites();
+  const { user, isSignOpen: authState, closeSign, toggleSign: toggleSignOpen } = useSession();
   const pathname = usePathname();
 
   const searchRef = useRef(null);
@@ -30,10 +32,9 @@ export default function Header() {
     () => false
   );
   const [welcomeVisible, setWelcomeVisible] = useState(true);
-  const [authState, setAuthState] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
 
-  const favoriteLength = favoritesArray.length;
+  const favoriteLength = favoriteIds.length;
   const overlayVisible = authState || searchFocused;
 
   useEffect(() => {
@@ -74,7 +75,7 @@ export default function Header() {
   }, [pathname]);
 
   function closeOverlay() {
-    setAuthState(false);
+    closeSign();
     setSearchFocused(false);
     searchRef.current?.blur();
   }
@@ -82,7 +83,7 @@ export default function Header() {
   function toggleSign() {
     searchRef.current?.blur();
     setSearchFocused(false);
-    setAuthState((previous) => !previous);
+    toggleSignOpen();
   }
 
   useEffect(() => {
@@ -90,7 +91,7 @@ export default function Header() {
 
     function handleKeyDown(event) {
       if (event.key === "Escape") {
-        setAuthState(false);
+        closeSign();
         setSearchFocused(false);
         searchRef.current?.blur();
       }
@@ -101,7 +102,7 @@ export default function Header() {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [overlayVisible]);
+  }, [overlayVisible, closeSign]);
 
   return (
     <>
@@ -172,7 +173,7 @@ export default function Header() {
                 type="button"
                 onClick={toggleSign}
                 className={styles.headerIcon}
-                aria-label="Open sign up"
+                aria-label={user ? `Account: ${user.username}` : "Open sign up"}
                 aria-expanded={authState}
                 aria-controls="sign-dialog"
               >
@@ -197,8 +198,9 @@ export default function Header() {
       {mounted &&
         createPortal(
           <Sign
+            user={user}
             authState={authState}
-            setAuthState={setAuthState}
+            onClose={closeSign}
           />,
           document.body
         )}

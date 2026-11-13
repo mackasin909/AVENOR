@@ -25,11 +25,8 @@ export default function CatalogCard({
   const isFirst = activeIndex === 0;
   const isLast = activeIndex >= total - 1;
 
-  const  { favoritesArray, toggleFavorite } = useFavorites()
-
-  const isFavorite = favoritesArray.some((item) => item.id === id)
-
-  const car = { id, images, name, price, year, location }
+  const { isFavorite: checkFavorite, toggleFavorite } = useFavorites();
+  const isFavorite = checkFavorite(id);
 
   return (
     <div  className={`col-4 ${styles.catalogCard}`}>
@@ -37,7 +34,7 @@ export default function CatalogCard({
         <button
           className={styles.favorite}
           type="button"
-          onClick={() => toggleFavorite(car)}
+          onClick={() => toggleFavorite(id)}
           aria-pressed={isFavorite}
           aria-label={
             isFavorite

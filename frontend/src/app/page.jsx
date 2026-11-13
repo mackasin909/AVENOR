@@ -1,13 +1,16 @@
 import Banner from "@/components/Banner/Banner";
 import Catalog from "@/components/Catalog/Catalog";
 import Welcome from "@/components/Welcome/Welcome";
+import { getCars } from "@/lib/cars";
 
-export default function Home({ searchParams }) {
+export default async function Home({ searchParams }) {
+  const cars = await getCars();
+
   return (
     <div className="home">
       <Welcome />
-      <Banner />
-      <Catalog searchParams={searchParams} />
+      <Banner cars={cars} />
+      <Catalog cars={cars} searchParams={searchParams} />
     </div>
   );
 }

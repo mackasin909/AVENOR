@@ -6,15 +6,12 @@ import { createPortal } from "react-dom";
 import { toast } from "react-toastify";
 
 export default function CarImage({ car }) {
-  const {
-    favoritesArray,
-    toggleFavorite
-  } = useFavorites()
+  const { isFavorite: checkFavorite, toggleFavorite } = useFavorites()
 
   const [selectedImage, setSelectedImage] = useState(null)
   const isOpen = selectedImage !== null
 
-  const isFavorite = favoritesArray.some((item) => item.id === car.id)
+  const isFavorite = checkFavorite(car.id)
 
   useEffect(() => {
     if (!isOpen) return
@@ -93,7 +90,8 @@ export default function CarImage({ car }) {
       <div className={styles.buttonBlock}>
         <button 
           type="button"
-          onClick={() => toggleFavorite(car)}
+          onClick={() => toggleFavorite(car.id)}
+          aria-pressed={isFavorite}
         >
           {isFavorite ? "Saved" : "Save"}
         </button>

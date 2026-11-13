@@ -1,5 +1,4 @@
 import FilterPanel from "@/components/CatalogFilter/FilterPanel";
-import { CARS } from "@/data/cars";
 import { searchCars } from "@/lib/searchCars";
 import CatalogResults from "./CatalogResults";
 import styles from "./Catalog.module.scss";
@@ -15,19 +14,19 @@ function getBounds(values) {
   };
 }
 
-export default async function Catalog({ searchParams }) {
+export default async function Catalog({ cars, searchParams }) {
   const params = (await searchParams) ?? {};
   const query = typeof params.search === "string" ? params.search : "";
-  const result = searchCars(CARS, query);
+  const result = searchCars(cars, query);
 
-  const filterCars = CARS.map(({ brand, model, location }) => ({
+  const filterCars = cars.map(({ brand, model, country }) => ({
     brand,
     model,
-    country: location.split(",").at(-1).trim(),
+    country,
   }));
 
-  const priceBounds = getBounds(CARS.map((car) => car.price));
-  const mileageBounds = getBounds(CARS.map((car) => car.mileage));
+  const priceBounds = getBounds(cars.map((car) => car.price));
+  const mileageBounds = getBounds(cars.map((car) => car.mileage));
 
   return (
     <div id="catalog" className={styles.catalog}>

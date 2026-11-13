@@ -4,12 +4,10 @@ import { useRef, useState } from "react"
 import { Swiper, SwiperSlide } from "swiper/react"
 import { A11y } from "swiper/modules"
 import Link from "next/link"
-import { CARS } from "@/data/cars"
 
 import "swiper/css"
-import styles from "./Banner.module.scss"
 
-const bannerCars = CARS.slice(0, 4)
+import styles from "./Banner.module.scss"
 
 function Arrow({ direction }) {
     return (
@@ -35,7 +33,8 @@ function Arrow({ direction }) {
     )
 }
 
-export default function Banner() {
+export default function Banner({ cars = [] }) {
+    const bannerCars = cars.slice(0, 4)
     const swiperRef = useRef(null)
     const [activeIndex, setActiveIndex] = useState(0)
 

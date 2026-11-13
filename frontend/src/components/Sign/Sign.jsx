@@ -1,20 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useState, useTransition } from "react";
+import { toast } from "react-toastify";
+import { logIn, logOut, signUp } from "@/app/actions/auth";
 import styles from "./Sign.module.scss";
 
-export default function Sign({ authState, setAuthState }) {
+export default function Sign({ user, authState, onClose }) {
   if (!authState) return null;
 
-  return <AuthDialog onClose={() => setAuthState(false)} />;
+  return user ? (
+    <AccountDialog user={user} onClose={onClose} />
+  ) : (
+    <AuthDialog onClose={onClose} />
+  );
+}
+
+function CloseButton({ onClose }) {
+  return (
+    <button
+      type="button"
+      className={styles.closeButton}
+      onClick={onClose}
+      aria-label="Close"
+    >
+      ×
+    </button>
+  );
 }
 
 function AuthDialog({ onClose }) {
   const [isLogin, setIsLogin] = useState(false);
 
-  function handleSubmit(event) {
-    event.preventDefault();
+  async function submit(previousState, formData) {
+    const result = await (isLogin ? logIn : signUp)(previousState, formData);
+
+    if (result.ok) {
+      toast.success(isLogin ? "Welcome back!" : "Account created");
+      onClose();
+    }
+
+    return result;
   }
+
+  const [state, formAction, pending] = useActionState(submit, null);
 
   return (
     <div
@@ -24,18 +52,8 @@ function AuthDialog({ onClose }) {
       aria-modal="true"
       aria-labelledby="sign-title"
     >
-      <form
-        className={styles.form}
-        onSubmit={handleSubmit}
-      >
-        <button
-          type="button"
-          className={styles.closeButton}
-          onClick={onClose}
-          aria-label="Close"
-        >
-          ×
-        </button>
+      <form className={styles.form} action={formAction}>
+        <CloseButton onClose={onClose} />
 
         <h2 id="sign-title">
           {isLogin ? "Log In" : "Sign Up"}
@@ -53,6 +71,8 @@ function AuthDialog({ onClose }) {
               type="text"
               placeholder="username"
               autoComplete="username"
+              minLength={3}
+              maxLength={32}
               required
             />
           </div>
@@ -86,9 +106,16 @@ function AuthDialog({ onClose }) {
             autoComplete={
               isLogin ? "current-password" : "new-password"
             }
+            minLength={isLogin ? undefined : 8}
             required
           />
         </div>
+
+        {state?.error && (
+          <p className={styles.formError} role="alert">
+            {state.error}
+          </p>
+        )}
 
         <button
           type="button"
@@ -103,10 +130,58 @@ function AuthDialog({ onClose }) {
         <button
           type="submit"
           className={styles.formButton}
+          disabled={pending}
         >
-          {isLogin ? "Log In" : "Sign Up"}
+          {pending ? "Please wait…" : isLogin ? "Log In" : "Sign Up"}
         </button>
       </form>
+    </div>
+  );
+}
+
+function AccountDialog({ user, onClose }) {
+  const [pending, startTransition] = useTransition();
+
+  function handleLogOut() {
+    startTransition(async () => {
+      await logOut();
+      toast.info("Logged out");
+      onClose();
+    });
+  }
+
+  return (
+    <div
+      id="sign-dialog"
+      className={styles.dialog}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="sign-title"
+    >
+      <div className={styles.form}>
+        <CloseButton onClose={onClose} />
+
+        <h2 id="sign-title">Account</h2>
+
+        <div className={styles.formBlock}>
+          <span className={styles.accountLabel}>Username</span>
+          <p className={styles.accountValue}>{user.username}</p>
+        </div>
+
+        <div className={styles.formBlock}>
+          <span className={styles.accountLabel}>Phone number</span>
+          <p className={styles.accountValue}>+{user.phone}</p>
+        </div>
+
+        <button
+          type="button"
+          className={styles.formButton}
+          onClick={handleLogOut}
+          disabled={pending}
+        >
+          {pending ? "Please wait…" : "Log Out"}
+        </button>
+      </div>
     </div>
   );
 }

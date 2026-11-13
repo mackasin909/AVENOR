@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { CARS } from "@/data/cars";
+import { getCarById } from "@/lib/cars";
 import styles from "./page.module.scss";
 import CarImage from "@/components/CarImage/CarImage";
 import CarForm from "@/components/CarForm/CarForm";
@@ -7,7 +7,7 @@ import CarForm from "@/components/CarForm/CarForm";
 export default async function ProductPage({ params }) {
   const { id } = await params;
 
-  const car = CARS.find((item) => item.id === Number(id));
+  const car = await getCarById(Number(id));
 
   if (!car) {
     notFound();

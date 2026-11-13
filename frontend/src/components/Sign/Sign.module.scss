@@ -149,3 +149,24 @@
     outline-offset: 4px;
   }
 }
+.formError {
+  margin: 0;
+  font-size: 14px;
+  color: #b42318;
+}
+
+.accountLabel {
+  font-size: 14px;
+  opacity: 0.6;
+}
+
+.accountValue {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.formButton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

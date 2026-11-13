@@ -40,7 +40,7 @@ export default function CatalogResults({ cars, query }) {
     return (
       (!brand || car.brand === brand) &&
       (!model || car.model === model) &&
-      (!country || car.location.split(",").at(-1).trim() === country) &&
+      (!country || car.country === country) &&
       matchesRange(car.price, minPrice, maxPrice) &&
       matchesRange(car.mileage, minMileage, maxMileage)
     );

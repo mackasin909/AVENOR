@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Car {
+  id          Int        @id @default(autoincrement())
+  brand       String
+  model       String
+  year        Int
+  price       Int
+  mileage     Int
+  engine      String
+  gearbox     String
+  fuelType    String
+  location    String
+  country     String
+  description String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  images      CarImage[]
+  favorites   Favorite[]
+
+  @@index([brand, model])
+  @@index([country])
+}
+
+model CarImage {
+  id       Int    @id @default(autoincrement())
+  url      String
+  position Int
+  carId    Int
+  car      Car    @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  @@index([carId, position])
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  username     String     @unique
+  phone        String     @unique
+  passwordHash String
+  createdAt    DateTime   @default(now())
+  sessions     Session[]
+  favorites    Favorite[]
+}
+
+// `id` is a SHA-256 hash of the token stored in the cookie, so a leaked
+// database does not expose usable session tokens.
+model Session {
+  id        String   @id
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Favorite {
+  userId    Int
+  carId     Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  car       Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  @@id([userId, carId])
+  @@index([carId])
+}
