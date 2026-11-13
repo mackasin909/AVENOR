@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   usePathname,
   useRouter,
@@ -19,10 +19,13 @@ export default function HeaderField({
 
   const urlQuery = searchParams.get("search") ?? "";
   const [value, setValue] = useState(urlQuery);
+  const [syncedQuery, setSyncedQuery] = useState(urlQuery);
 
-  useEffect(() => {
+  // Keep the input in sync when the URL changes (back/forward, reset links).
+  if (syncedQuery !== urlQuery) {
+    setSyncedQuery(urlQuery);
     setValue(urlQuery);
-  }, [urlQuery]);
+  }
 
   function goToCatalog(query) {
     const url = query ? `/?search=${encodeURIComponent(query)}` : "/";

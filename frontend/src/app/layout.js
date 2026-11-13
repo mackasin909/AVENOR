@@ -19,12 +19,12 @@ const manrope = localFont({
 
 export const metadata = {
   title: 'AVENOR',
-  description: 'Создано с помощью Next.js',
+  description: 'AVENOR — a curated collection of exceptional automobiles.',
 }
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="ru" className={manrope.variable}>
+    <html lang="en" className={manrope.variable}>
       <body>
         <FavoritesProvider>
           <Header />

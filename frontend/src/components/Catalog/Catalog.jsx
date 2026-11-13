@@ -27,7 +27,7 @@ export default async function Catalog({ searchParams }) {
   }));
 
   const priceBounds = getBounds(CARS.map((car) => car.price));
-  const mileageBounds = getBounds(CARS.map((car) => car.milage));
+  const mileageBounds = getBounds(CARS.map((car) => car.mileage));
 
   return (
     <div id="catalog" className={styles.catalog}>

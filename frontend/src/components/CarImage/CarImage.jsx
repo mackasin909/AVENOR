@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import styles from "./CarImage.module.scss"
 import useFavorites from "@/context/FavoritesContext"
 import { createPortal } from "react-dom";
+import { toast } from "react-toastify";
 
 export default function CarImage({ car }) {
   const {
@@ -35,13 +36,35 @@ export default function CarImage({ car }) {
     }
   }, [isOpen])
 
+  async function handleShare() {
+    const url = window.location.href
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: car.name, url })
+      } catch (error) {
+        if (error?.name !== "AbortError") {
+          toast.error("Could not share this listing")
+        }
+      }
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(url)
+      toast.info("Link copied to clipboard")
+    } catch {
+      toast.error("Could not copy the link")
+    }
+  }
+
   return (
     <div className={styles.wrapper}>
       <button
         type="button"
         className={styles.imageButton}
         onClick={() => setSelectedImage(car.images[0])}
-        aria-label="Открыть главное фото"
+        aria-label="Open main photo"
       >
         <img
           src={car.images[0]}
@@ -57,11 +80,11 @@ export default function CarImage({ car }) {
             key={image}
             className={styles.imageButton}
             onClick={() => setSelectedImage(image)}
-            aria-label={`Открыть фото ${index + 2}`}
+            aria-label={`Open photo ${index + 2}`}
           >
             <img
               src={image}
-              alt={`${car.name} — фото ${index + 2}`}
+              alt={`${car.name} — photo ${index + 2}`}
             />
           </button>
         ))}
@@ -74,7 +97,7 @@ export default function CarImage({ car }) {
         >
           {isFavorite ? "Saved" : "Save"}
         </button>
-        <button type="button">Share</button>
+        <button type="button" onClick={handleShare}>Share</button>
       </div>
 
       {isOpen && createPortal(
@@ -82,14 +105,14 @@ export default function CarImage({ car }) {
           className={styles.lightbox}
           role="dialog"
           aria-modal="true"
-          aria-label={`Фото ${car.name}`}
+          aria-label={`${car.name} photo`}
           onClick={() => setSelectedImage(null)}
         >
           <button
             type="button"
             className={styles.closeButton}
             onClick={() => setSelectedImage(null)}
-            aria-label="Закрыть фото"
+            aria-label="Close photo"
             autoFocus
           >
             ×

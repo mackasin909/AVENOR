@@ -42,7 +42,7 @@ export default function CatalogResults({ cars, query }) {
       (!model || car.model === model) &&
       (!country || car.location.split(",").at(-1).trim() === country) &&
       matchesRange(car.price, minPrice, maxPrice) &&
-      matchesRange(car.milage, minMileage, maxMileage)
+      matchesRange(car.mileage, minMileage, maxMileage)
     );
   });
 

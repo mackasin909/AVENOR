@@ -1,4 +1,4 @@
-export const CARS = [
+const RAW_CARS = [
   {
     id: 1,
     images: [
@@ -11,9 +11,9 @@ export const CARS = [
     location: "Bakersfield, CA, United States",
     year: 2025,
     brand: "Porsche",
-    model: "911 GT RS",
+    model: "911 GT3 RS",
     price: 679106,
-    milage: 1800,
+    mileage: 1800,
     engine: "6 Cylinder",
     gearbox: "7-speed PDK dual-clutch",
     fuelType: "Petrol",
@@ -34,7 +34,7 @@ export const CARS = [
     brand: "McLaren",
     model: "765LT",
     price: 492476,
-    milage: 9500,
+    mileage: 9500,
     engine: "8 Cylinder",
     gearbox: "7-speed SSG dual-clutch",
     fuelType: "Petrol",
@@ -55,7 +55,7 @@ export const CARS = [
     brand: "Lamborghini",
     model: "Diablo",
     price: 650180,
-    milage: 32000,
+    mileage: 32000,
     engine: "12 Cylinder",
     gearbox: "5-speed manual",
     fuelType: "Petrol",
@@ -76,7 +76,7 @@ export const CARS = [
     brand: "Ferrari",
     model: "488 rwd",
     price: 1329010,
-    milage: 18500,
+    mileage: 18500,
     engine: "8 Cylinder",
     gearbox: "7-speed F1 dual-clutch",
     fuelType: "Petrol",
@@ -97,7 +97,7 @@ export const CARS = [
     brand: "Mercedes-Benz",
     model: "SLR McLaren rwd",
     price: 820000,
-    milage: 24000,
+    mileage: 24000,
     engine: "8 Cylinder",
     gearbox: "5-speed AMG Speedshift R automatic",
     fuelType: "Petrol",
@@ -118,7 +118,7 @@ export const CARS = [
     brand: "Porsche",
     model: "918 Spyder Roadster 2D",
     price: 5400200,
-    milage: 6200,
+    mileage: 6200,
     engine: "8 Cylinder Hybrid",
     gearbox: "7-speed PDK dual-clutch",
     fuelType: "Plug-in hybrid (petrol/electric)",
@@ -139,7 +139,7 @@ export const CARS = [
     brand: "Aston Martin",
     model: "DBS Superleggera rwd",
     price: 245000,
-    milage: 12500,
+    mileage: 12500,
     engine: "12 Cylinder",
     gearbox: "8-speed ZF automatic",
     fuelType: "Petrol",
@@ -160,7 +160,7 @@ export const CARS = [
     brand: "Koenigsegg",
     model: "Jesko",
     price: 4500000,
-    milage: 350,
+    mileage: 350,
     engine: "8 Cylinder",
     gearbox: "9-speed Light Speed Transmission (LST)",
     fuelType: "Petrol",
@@ -181,7 +181,7 @@ export const CARS = [
     brand: "Audi",
     model: "R8",
     price: 115000,
-    milage: 28000,
+    mileage: 28000,
     engine: "10 Cylinder",
     gearbox: "7-speed S tronic dual-clutch",
     fuelType: "Petrol",
@@ -189,3 +189,8 @@ export const CARS = [
       "2016 Audi R8 V10 featuring a naturally aspirated 5.2L V10 engine and a 7-speed S tronic dual-clutch transmission. Quattro all-wheel drive, a mid-engine layout, and a distinctive V10 soundtrack combine everyday usability with supercar excitement.",
   },
 ];
+
+export const CARS = RAW_CARS.map((car) => ({
+  ...car,
+  name: `${car.brand} ${car.model}`,
+}));

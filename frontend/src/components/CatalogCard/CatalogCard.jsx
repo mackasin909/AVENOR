@@ -41,8 +41,8 @@ export default function CatalogCard({
           aria-pressed={isFavorite}
           aria-label={
             isFavorite
-              ? `Удалить ${name} из избранного`
-              : `Добавить ${name} в избранное`
+              ? `Remove ${name} from favorites`
+              : `Add ${name} to favorites`
           }
         >
           {isFavorite ? (
@@ -84,7 +84,7 @@ export default function CatalogCard({
               <Link href={`/car/${id}`} className={styles.imageWrapper}>
                 <img
                   src={image}
-                  alt={`${name} — фото ${index + 1}`}
+                  alt={`${name} — photo ${index + 1}`}
                   loading="lazy"
                   draggable={false}
                 />
@@ -98,7 +98,7 @@ export default function CatalogCard({
             <button
               className={`${styles.arrow} ${styles.arrowPrev}`}
               type="button"
-              aria-label="Предыдущее фото"
+              aria-label="Previous photo"
               disabled={isFirst}
               onClick={() => swiperRef.current?.slidePrev()}
             >
@@ -122,7 +122,7 @@ export default function CatalogCard({
             <button
               className={`${styles.arrow} ${styles.arrowNext}`}
               type="button"
-              aria-label="Следующее фото"
+              aria-label="Next photo"
               disabled={isLast}
               onClick={() => swiperRef.current?.slideNext()}
             >
@@ -152,7 +152,7 @@ export default function CatalogCard({
             aria-live="polite"
             aria-atomic="true"
           >
-            <span className={styles.srOnly}>Фото </span>
+            <span className={styles.srOnly}>Photo </span>
             {activeIndex + 1} / {total}
           </div>
         )}

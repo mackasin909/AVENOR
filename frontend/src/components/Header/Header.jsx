@@ -1,6 +1,12 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
+import {
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -10,13 +16,19 @@ import HeaderField from "../HeaderField/HeaderField";
 import useFavorites from "@/context/FavoritesContext";
 import Sign from "../Sign/Sign";
 
+const subscribeNoop = () => () => {};
+
 export default function Header() {
   const { favoritesArray } = useFavorites();
   const pathname = usePathname();
 
   const searchRef = useRef(null);
 
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false
+  );
   const [welcomeVisible, setWelcomeVisible] = useState(true);
   const [authState, setAuthState] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
@@ -42,20 +54,11 @@ export default function Header() {
     !overlayVisible;
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    const welcome = document.getElementById("welcome");
-
-    if (!welcome) {
-      setWelcomeVisible(false);
-      return;
-    }
-
     function update() {
+      const welcome = document.getElementById("welcome");
+
       setWelcomeVisible(
-        welcome.getBoundingClientRect().bottom > 1
+        Boolean(welcome) && welcome.getBoundingClientRect().bottom > 1
       );
     }
 

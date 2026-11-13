@@ -6,20 +6,7 @@ import FilterButton from "./FilterButton";
 import FilterSelect from "./FilterSelect";
 import PriceRange from "./PriceRange";
 import styles from "./CatalogFilter.module.scss";
-
-const FILTER_KEYS = [
-  "brand",
-  "model",
-  "country",
-  "minPrice",
-  "maxPrice",
-  "minMileage",
-  "maxMileage",
-  "minYear",
-  "maxYear",
-  "fuel",
-  "sort",
-];
+import { FILTER_KEYS } from "./filterKeys";
 
 export default function FilterPanel({ cars = [], priceBounds, mileageBounds }) {
   const searchParams = useSearchParams();

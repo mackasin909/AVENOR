@@ -2,12 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import styles from "./CatalogFilter.module.scss";
-
-const FILTER_KEYS = [
-  "brand", "model", "country",
-  "minPrice", "maxPrice", "minMileage", "maxMileage",
-  "minYear", "maxYear", "fuel", "sort",
-];
+import { FILTER_KEYS } from "./filterKeys";
 
 export default function FilterButton() {
   const searchParams = useSearchParams();

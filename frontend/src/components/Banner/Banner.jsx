@@ -3,6 +3,7 @@
 import { useRef, useState } from "react"
 import { Swiper, SwiperSlide } from "swiper/react"
 import { A11y } from "swiper/modules"
+import Link from "next/link"
 import { CARS } from "@/data/cars"
 
 import "swiper/css"
@@ -129,7 +130,7 @@ export default function Banner() {
                                                         .join(" · ")}
                                                 </p>
 
-                                                <a
+                                                <Link
                                                     className={styles.details}
                                                     href={`/car/${car.id}`}
                                                 >
@@ -137,7 +138,7 @@ export default function Banner() {
                                                     <span aria-hidden="true">
                                                         →
                                                     </span>
-                                                </a>
+                                                </Link>
                                             </div>
                                         </article>
                                     </SwiperSlide>
@@ -149,7 +150,7 @@ export default function Banner() {
                                     <button
                                         className={`${styles.arrow} ${styles.prev}`}
                                         type="button"
-                                        aria-label="Предыдущий автомобиль"
+                                        aria-label="Previous car"
                                         onClick={() => {
                                             swiperRef.current?.slidePrev()
                                         }}
@@ -160,7 +161,7 @@ export default function Banner() {
                                     <button
                                         className={`${styles.arrow} ${styles.next}`}
                                         type="button"
-                                        aria-label="Следующий автомобиль"
+                                        aria-label="Next car"
                                         onClick={() => {
                                             swiperRef.current?.slideNext()
                                         }}
@@ -174,7 +175,7 @@ export default function Banner() {
                         {hasMultipleCars && (
                             <div
                                 className={styles.pagination}
-                                aria-label="Выбор автомобиля"
+                                aria-label="Choose a car"
                             >
                                 {bannerCars.map((car, index) => (
                                     <button
@@ -185,7 +186,7 @@ export default function Banner() {
                                                 ? styles.dotActive
                                                 : ""
                                         }`}
-                                        aria-label={`Показать ${car.brand} ${car.model}`}
+                                        aria-label={`Show ${car.name}`}
                                         aria-current={
                                             activeIndex === index
                                                 ? "true"

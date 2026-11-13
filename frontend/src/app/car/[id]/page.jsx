@@ -33,7 +33,7 @@ export default async function ProductPage({ params }) {
                   <span>Year</span>
                 </div>
                 <div>
-                  <p>{car.milage} MI</p>
+                  <p>{car.mileage} MI</p>
                   <span>Mileage</span>
                 </div>
                 <div>
