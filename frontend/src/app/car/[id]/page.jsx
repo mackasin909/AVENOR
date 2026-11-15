@@ -57,7 +57,7 @@ export default async function ProductPage({ params }) {
               </div>
             </div>
           </div>
-          <CarForm />
+          <CarForm carId={car.id} />
         </div>
       </div>
     </div>

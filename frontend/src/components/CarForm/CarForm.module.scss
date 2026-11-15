@@ -58,3 +58,50 @@
         white-space: nowrap;
     }
 }
+.carForm form {
+    & input[aria-invalid="true"],
+    & textarea[aria-invalid="true"] {
+        border-color: #b42318;
+    }
+
+    & button:disabled {
+        opacity: 0.6;
+        cursor: default;
+    }
+}
+
+.error {
+    margin: -4px 0 0;
+    font-size: 13px;
+    color: #b42318;
+}
+
+.success {
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+    margin-top: 16px;
+
+    & p {
+        margin: 0;
+        font-size: 14px;
+    }
+}
+
+.whatsapp {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-block: 8px;
+    border-radius: 2px;
+    background-color: #25d366;
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-decoration: none;
+    transition: opacity 0.2s;
+
+    &:hover {
+        opacity: 0.85;
+    }
+}

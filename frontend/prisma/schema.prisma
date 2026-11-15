@@ -24,6 +24,7 @@ model Car {
   updatedAt   DateTime   @updatedAt
   images      CarImage[]
   favorites   Favorite[]
+  inquiries   Inquiry[]
 
   @@index([brand, model])
   @@index([country])
@@ -47,6 +48,7 @@ model User {
   createdAt    DateTime   @default(now())
   sessions     Session[]
   favorites    Favorite[]
+  inquiries    Inquiry[]
 }
 
 // `id` is a SHA-256 hash of the token stored in the cookie, so a leaked
@@ -70,4 +72,21 @@ model Favorite {
 
   @@id([userId, carId])
   @@index([carId])
+}
+
+// Request sent from the contact form on a car page.
+model Inquiry {
+  id        Int      @id @default(autoincrement())
+  carId     Int
+  car       Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
+  // Set when the sender was logged in.
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+
+  @@index([carId])
+  @@index([createdAt])
 }
