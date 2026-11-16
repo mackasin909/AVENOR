@@ -1,82 +1,54 @@
-"use client";
-
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import CatalogCard from "@/components/CatalogCard/CatalogCard";
+import SortSelect from "./SortSelect";
+import Pagination from "./Pagination";
 import styles from "./Catalog.module.scss";
 
-function readBound(params, key) {
-  const rawValue = params.get(key);
-
-  if (rawValue === null || rawValue.trim() === "") return null;
-
-  const value = Number(rawValue);
-  return Number.isFinite(value) ? value : null;
-}
-
-function matchesRange(value, min, max) {
-  if (min === null && max === null) return true;
-
-  return (
-    Number.isFinite(value) &&
-    (min === null || value >= min) &&
-    (max === null || value <= max)
-  );
-}
-
-export default function CatalogResults({ cars, query }) {
-  const params = useSearchParams();
-
-  const brand = params.get("brand");
-  const model = params.get("model");
-  const country = params.get("country");
-
-  const minPrice = readBound(params, "minPrice");
-  const maxPrice = readBound(params, "maxPrice");
-  const minMileage = readBound(params, "minMileage");
-  const maxMileage = readBound(params, "maxMileage");
-
-  const result = cars.filter((car) => {
-    return (
-      (!brand || car.brand === brand) &&
-      (!model || car.model === model) &&
-      (!country || car.country === country) &&
-      matchesRange(car.price, minPrice, maxPrice) &&
-      matchesRange(car.mileage, minMileage, maxMileage)
-    );
-  });
-
+export default function CatalogResults({
+  cars,
+  total,
+  page,
+  pageCount,
+  query,
+  sort,
+  params,
+}) {
   return (
     <div className={styles.catalogResults}>
-      {query && (
+      <div className={styles.resultsTop}>
         <p className={styles.info}>
-          {result.length} result{result.length === 1 ? "" : "s"} for “{query}”
+          {total} car{total === 1 ? "" : "s"}
+          {query ? ` for “${query}”` : ""}
         </p>
-      )}
 
-      {result.length > 0 ? (
-        <div className="grid">
-          {result.map((car) => (
-            <CatalogCard
-              key={car.id}
-              id={car.id}
-              year={car.year}
-              location={car.location}
-              images={car.images}
-              name={`${car.brand} ${car.model}`}
-              price={car.price}
-            />
-          ))}
-        </div>
+        <SortSelect value={sort} />
+      </div>
+
+      {cars.length > 0 ? (
+        <>
+          <div className="grid">
+            {cars.map((car) => (
+              <CatalogCard
+                key={car.id}
+                id={car.id}
+                year={car.year}
+                location={car.location}
+                images={car.images}
+                name={car.name}
+                price={car.price}
+              />
+            ))}
+          </div>
+
+          <Pagination page={page} pageCount={pageCount} params={params} />
+        </>
       ) : (
         <div className={styles.empty}>
           <p>{query ? `No cars found for “${query}”` : "No cars found"}</p>
 
-          {query && (
-            <Link className={styles.emptyLink} href="/" scroll={false}>
-              Reset search
-            </Link>
-          )}
+          <Link className={styles.emptyLink} href="/#catalog" scroll={false}>
+            Reset search and filters
+          </Link>
         </div>
       )}
     </div>

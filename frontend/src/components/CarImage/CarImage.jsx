@@ -4,6 +4,7 @@ import styles from "./CarImage.module.scss"
 import useFavorites from "@/context/FavoritesContext"
 import { createPortal } from "react-dom";
 import { toast } from "react-toastify";
+import CompareButton from "@/components/Compare/CompareButton";
 
 export default function CarImage({ car }) {
   const { isFavorite: checkFavorite, toggleFavorite } = useFavorites()
@@ -96,6 +97,7 @@ export default function CarImage({ car }) {
           {isFavorite ? "Saved" : "Save"}
         </button>
         <button type="button" onClick={handleShare}>Share</button>
+        {car.status === "approved" && <CompareButton carId={car.id} />}
       </div>
 
       {isOpen && createPortal(

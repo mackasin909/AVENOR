@@ -8,36 +8,23 @@ import {
   hashPassword,
   verifyPassword,
 } from "@/lib/auth";
-
-const USERNAME_RE = /^[A-Za-z0-9_.-]{3,32}$/;
-
-function normalizePhone(value) {
-  const digits = String(value ?? "").replace(/\D/g, "");
-  return digits.length >= 7 && digits.length <= 15 ? digits : null;
-}
-
-function readPassword(formData) {
-  const password = String(formData.get("password") ?? "");
-  return password.length >= 8 && password.length <= 128 ? password : null;
-}
+import {
+  PASSWORD_ERROR,
+  PHONE_ERROR,
+  USERNAME_ERROR,
+  isValidPassword,
+  isValidUsername,
+  normalizePhone,
+} from "@/lib/userValidation";
 
 export async function signUp(_previousState, formData) {
   const username = String(formData.get("username") ?? "").trim();
   const phone = normalizePhone(formData.get("phone"));
-  const password = readPassword(formData);
+  const password = String(formData.get("password") ?? "");
 
-  if (!USERNAME_RE.test(username)) {
-    return {
-      ok: false,
-      error: "Username must be 3–32 characters: letters, digits, _ . -",
-    };
-  }
-  if (!phone) {
-    return { ok: false, error: "Enter a valid phone number" };
-  }
-  if (!password) {
-    return { ok: false, error: "Password must be at least 8 characters" };
-  }
+  if (!isValidUsername(username)) return { ok: false, error: USERNAME_ERROR };
+  if (!phone) return { ok: false, error: PHONE_ERROR };
+  if (!isValidPassword(password)) return { ok: false, error: PASSWORD_ERROR };
 
   const existing = await prisma.user.findFirst({
     where: { OR: [{ username }, { phone }] },

@@ -1,5 +1,9 @@
 import { notFound } from "next/navigation";
-import { getCarById } from "@/lib/cars";
+import { getCurrentUser } from "@/lib/auth";
+import { getCarById, getSimilarCars } from "@/lib/cars";
+import CatalogCard from "@/components/CatalogCard/CatalogCard";
+import RecentlyViewed from "@/components/RecentlyViewed/RecentlyViewed";
+import RecordView from "@/components/RecentlyViewed/RecordView";
 import styles from "./page.module.scss";
 import CarImage from "@/components/CarImage/CarImage";
 import CarForm from "@/components/CarForm/CarForm";
@@ -7,15 +11,26 @@ import CarForm from "@/components/CarForm/CarForm";
 export default async function ProductPage({ params }) {
   const { id } = await params;
 
-  const car = await getCarById(Number(id));
+  const viewer = await getCurrentUser();
+  const car = await getCarById(Number(id), viewer);
 
   if (!car) {
     notFound();
   }
 
+  const isPublic = car.status === "approved";
+  const similar = isPublic ? await getSimilarCars(car) : [];
+
   return (
     <div className={styles.carPage}>
       <div className="container">
+        {!isPublic && (
+          <p className={styles.notice} role="status">
+            {car.status === "pending"
+              ? "This listing is awaiting moderation and is not visible in the catalog yet."
+              : `This listing was rejected${car.statusNote ? `: ${car.statusNote}` : "."}`}
+          </p>
+        )}
         <CarImage car={car}/>
         <div className={styles.infoMain}>
           <div className={styles.carInfo}>
@@ -57,9 +72,33 @@ export default async function ProductPage({ params }) {
               </div>
             </div>
           </div>
-          <CarForm carId={car.id} />
+          {isPublic ? <CarForm carId={car.id} /> : null}
         </div>
+
+        {similar.length > 0 && (
+          <section className={styles.similar} aria-labelledby="similar-title">
+            <h2 id="similar-title" className={styles.sectionTitle}>
+              Similar cars
+            </h2>
+            <div className="grid">
+              {similar.map((item) => (
+                <CatalogCard
+                  key={item.id}
+                  id={item.id}
+                  name={item.name}
+                  year={item.year}
+                  price={item.price}
+                  location={item.location}
+                  images={item.images}
+                />
+              ))}
+            </div>
+          </section>
+        )}
       </div>
+
+      {isPublic && <RecordView carId={car.id} />}
+      <RecentlyViewed excludeId={car.id} />
     </div>
   );
 }

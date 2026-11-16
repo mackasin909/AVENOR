@@ -71,6 +71,27 @@ export async function deleteSession() {
   cookieStore.delete(SESSION_COOKIE);
 }
 
+// Removes every session of the user except the current one
+// (e.g. after a password change).
+export async function revokeOtherSessions(userId) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(SESSION_COOKIE)?.value;
+  const currentId = token ? hashToken(token) : null;
+
+  const { count } = await prisma.session.deleteMany({
+    where: { userId, ...(currentId ? { id: { not: currentId } } : {}) },
+  });
+
+  return count;
+}
+
+// Logs the user out on every device, including this one.
+export async function revokeAllSessions(userId) {
+  await prisma.session.deleteMany({ where: { userId } });
+  const cookieStore = await cookies();
+  cookieStore.delete(SESSION_COOKIE);
+}
+
 // Current user for this request, or null. Cached per request.
 export const getCurrentUser = cache(async () => {
   const cookieStore = await cookies();
@@ -79,7 +100,9 @@ export const getCurrentUser = cache(async () => {
 
   const session = await prisma.session.findUnique({
     where: { id: hashToken(token) },
-    include: { user: { select: { id: true, username: true, phone: true } } },
+    include: {
+      user: { select: { id: true, username: true, phone: true, role: true } },
+    },
   });
 
   if (!session) return null;
@@ -91,3 +114,8 @@ export const getCurrentUser = cache(async () => {
 
   return session.user;
 });
+
+export async function requireAdmin() {
+  const user = await getCurrentUser();
+  return user?.role === "admin" ? user : null;
+}

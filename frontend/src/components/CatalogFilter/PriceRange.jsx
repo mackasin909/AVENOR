@@ -4,6 +4,7 @@ import { useState } from "react";
 import styles from "./CatalogFilter.module.scss";
 
 const numberFormat = new Intl.NumberFormat("en-US");
+const formatNumber = (value) => numberFormat.format(value);
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -18,7 +19,7 @@ function readBound(params, name, fallback, min, max) {
   return Number.isFinite(value) ? clamp(value, min, max) : fallback;
 }
 
-function RangeField({ label, value, prefix, onChange, onReset }) {
+function RangeField({ label, value, prefix, format, onChange, onReset }) {
   const [draft, setDraft] = useState(null);
 
   function handleChange(event) {
@@ -45,7 +46,7 @@ function RangeField({ label, value, prefix, onChange, onReset }) {
         type="text"
         inputMode="numeric"
         aria-label={label}
-        value={draft ?? numberFormat.format(value)}
+        value={draft ?? format(value)}
         onChange={handleChange}
         onBlur={() => setDraft(null)}
         onKeyDown={(event) => {
@@ -78,6 +79,7 @@ export default function PriceRange({
   prefix = "$",
   minName = "minPrice",
   maxName = "maxPrice",
+  format = formatNumber,
   params,
   onChange,
 }) {
@@ -124,6 +126,7 @@ export default function PriceRange({
         <RangeField
           label={`Minimum ${label}`}
           prefix={prefix}
+          format={format}
           value={low}
           onChange={updateLow}
           onReset={() => onChange(minName, null)}
@@ -132,6 +135,7 @@ export default function PriceRange({
         <RangeField
           label={`Maximum ${label}`}
           prefix={prefix}
+          format={format}
           value={high}
           onChange={updateHigh}
           onReset={() => onChange(maxName, null)}

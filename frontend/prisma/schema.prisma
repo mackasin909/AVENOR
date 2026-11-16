@@ -7,6 +7,19 @@ datasource db {
   provider = "sqlite"
 }
 
+enum Role {
+  user
+  admin
+}
+
+// Dealer cars (ownerId = null) are approved on creation; cars listed by
+// users start as `pending` and appear in the catalog once an admin approves.
+enum CarStatus {
+  pending
+  approved
+  rejected
+}
+
 model Car {
   id          Int        @id @default(autoincrement())
   brand       String
@@ -20,6 +33,11 @@ model Car {
   location    String
   country     String
   description String
+  status      CarStatus  @default(approved)
+  // Shown to the owner when an admin rejects the listing.
+  statusNote  String?
+  ownerId     Int?
+  owner       User?      @relation("CarOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   images      CarImage[]
@@ -28,6 +46,10 @@ model Car {
 
   @@index([brand, model])
   @@index([country])
+  @@index([status])
+  @@index([ownerId])
+  @@index([price])
+  @@index([year])
 }
 
 model CarImage {
@@ -45,10 +67,12 @@ model User {
   username     String     @unique
   phone        String     @unique
   passwordHash String
+  role         Role       @default(user)
   createdAt    DateTime   @default(now())
   sessions     Session[]
   favorites    Favorite[]
   inquiries    Inquiry[]
+  cars         Car[]      @relation("CarOwner")
 }
 
 // `id` is a SHA-256 hash of the token stored in the cookie, so a leaked

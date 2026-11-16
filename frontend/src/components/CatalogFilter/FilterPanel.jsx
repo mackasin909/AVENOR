@@ -1,15 +1,26 @@
 "use client";
 
-import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useTransition } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import FilterButton from "./FilterButton";
 import FilterSelect from "./FilterSelect";
 import PriceRange from "./PriceRange";
 import styles from "./CatalogFilter.module.scss";
 import { FILTER_KEYS } from "./filterKeys";
 
-export default function FilterPanel({ cars = [], priceBounds, mileageBounds }) {
+const formatYear = (value) => String(value);
+
+export default function FilterPanel({
+  cars = [],
+  fuels = [],
+  priceBounds,
+  mileageBounds,
+  yearBounds,
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
   const [selectState, setSelectState] = useState(null);
   const [draft, setDraft] = useState(null);
 
@@ -17,6 +28,7 @@ export default function FilterPanel({ cars = [], priceBounds, mileageBounds }) {
   const brand = filterParams.get("brand") ?? "";
   const model = filterParams.get("model") ?? "";
   const country = filterParams.get("country") ?? "";
+  const fuel = filterParams.get("fuel") ?? "";
 
   const brands = [...new Set(cars.map((car) => car.brand))];
   const models = [
@@ -72,21 +84,26 @@ export default function FilterPanel({ cars = [], priceBounds, mileageBounds }) {
   function handleApplyFilters() {
     if (!draft) return;
 
-    const url = new URL(window.location.href);
+    const params = new URLSearchParams(searchParams.toString());
 
     for (const key of FILTER_KEYS) {
       const value = draft.get(key);
 
       if (value === null) {
-        url.searchParams.delete(key);
+        params.delete(key);
       } else {
-        url.searchParams.set(key, value);
+        params.set(key, value);
       }
     }
 
-    if (url.href !== window.location.href) {
-      window.history.replaceState(null, "", url.href);
-    }
+    // New filters start from the first page.
+    params.delete("page");
+
+    const query = params.toString();
+
+    startTransition(() => {
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    });
 
     setDraft(null);
     handleCloseSelect();
@@ -138,12 +155,39 @@ export default function FilterPanel({ cars = [], priceBounds, mileageBounds }) {
           onSelect={(value) => updateFilter("country", value)}
           onClose={handleCloseSelect}
         />
+
+        <p>Fuel type</p>
+
+        <FilterSelect
+          placeholder="Any fuel"
+          options={fuels}
+          value={fuel}
+          isOpen={selectState === "fuel"}
+          onToggle={() => handleToggle("fuel")}
+          onSelect={(value) => updateFilter("fuel", value)}
+          onClose={handleCloseSelect}
+        />
       </div>
 
       {priceBounds && (
         <PriceRange
           min={priceBounds.min}
           max={priceBounds.max}
+          params={filterParams}
+          onChange={updateFilter}
+        />
+      )}
+
+      {yearBounds && (
+        <PriceRange
+          min={yearBounds.min}
+          max={yearBounds.max}
+          title="Year"
+          label="year"
+          prefix=""
+          minName="minYear"
+          maxName="maxYear"
+          format={formatYear}
           params={filterParams}
           onChange={updateFilter}
         />
@@ -167,9 +211,9 @@ export default function FilterPanel({ cars = [], priceBounds, mileageBounds }) {
         type="button"
         className={styles.applyButton}
         onClick={handleApplyFilters}
-        disabled={!draft}
+        disabled={!draft || isPending}
       >
-        Apply filters
+        {isPending ? "Applying…" : "Apply filters"}
       </button>
     </aside>
   );

@@ -5,6 +5,7 @@ import { FavoritesProvider } from '@/context/FavoritesContext';
 import { SessionProvider } from '@/context/SessionContext';
 import { getCurrentUser } from '@/lib/auth';
 import { getFavoriteIds } from '@/lib/cars';
+import CompareBar from '@/components/Compare/CompareBar';
 
 const manrope = localFont({
   src: [
@@ -36,6 +37,7 @@ export default async function RootLayout({ children }) {
           <FavoritesProvider initialIds={favoriteIds}>
             <Header />
             <main data-page-content>{children}</main>
+            <CompareBar />
           </FavoritesProvider>
         </SessionProvider>
       </body>

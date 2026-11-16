@@ -85,3 +85,25 @@
   line-height: 25px;
 }
 
+
+.notice {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  border-radius: 6px;
+  background-color: #fef0c7;
+  color: #93370d;
+  font-size: 14px;
+}
+
+.similar {
+  padding-top: 60px;
+}
+
+.sectionTitle {
+  margin-bottom: 24px;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink);
+}

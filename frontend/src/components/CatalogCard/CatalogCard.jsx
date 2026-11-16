@@ -17,6 +17,7 @@ export default function CatalogCard({
   price,
   year,
   location,
+  className = "col-4",
 }) {
   const swiperRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -29,7 +30,7 @@ export default function CatalogCard({
   const isFavorite = checkFavorite(id);
 
   return (
-    <div  className={`col-4 ${styles.catalogCard}`}>
+    <div className={`${className} ${styles.catalogCard}`}>
       <div className={styles.gallery}>
         <button
           className={styles.favorite}

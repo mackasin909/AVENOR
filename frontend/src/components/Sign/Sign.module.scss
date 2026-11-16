@@ -170,3 +170,23 @@
   opacity: 0.6;
   cursor: default;
 }
+
+.accountLinks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+
+  a {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--ink);
+    font-size: 14px;
+    text-align: center;
+    text-decoration: none;
+
+    &:hover {
+      border-color: var(--ink);
+    }
+  }
+}

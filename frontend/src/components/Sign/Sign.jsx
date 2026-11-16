@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState, useTransition } from "react";
 import { toast } from "react-toastify";
 import { logIn, logOut, signUp } from "@/app/actions/auth";
@@ -172,6 +173,15 @@ function AccountDialog({ user, onClose }) {
           <span className={styles.accountLabel}>Phone number</span>
           <p className={styles.accountValue}>+{user.phone}</p>
         </div>
+
+        <nav className={styles.accountLinks} aria-label="Account">
+          <Link href="/account" onClick={onClose}>My account</Link>
+          <Link href="/my-listings" onClick={onClose}>My listings</Link>
+          <Link href="/my-listings/new" onClick={onClose}>Sell a car</Link>
+          {user.role === "admin" && (
+            <Link href="/admin" onClick={onClose}>Admin panel</Link>
+          )}
+        </nav>
 
         <button
           type="button"

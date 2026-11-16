@@ -18,7 +18,7 @@ function inRange(value, { min, max }) {
   return value.length >= min && value.length <= max;
 }
 
-// Dealer's WhatsApp number from .env, digits only (e.g. 79991234567).
+// Dealer WhatsApp number from .env, digits only (e.g. 79991234567).
 function getWhatsAppPhone() {
   const digits = String(process.env.WHATSAPP_PHONE ?? "").replace(/\D/g, "");
   return digits.length >= 7 && digits.length <= 15 ? digits : null;
@@ -76,11 +76,19 @@ export async function createInquiry(_previousState, formData) {
   const car = Number.isInteger(carId) && carId > 0
     ? await prisma.car.findUnique({
         where: { id: carId },
-        select: { id: true, year: true, brand: true, model: true, price: true },
+        select: {
+          id: true,
+          year: true,
+          brand: true,
+          model: true,
+          price: true,
+          status: true,
+          owner: { select: { phone: true } },
+        },
       })
     : null;
 
-  if (!car) {
+  if (!car || car.status !== "approved") {
     return { ok: false, errors: { form: "This car is no longer available" } };
   }
 
@@ -91,7 +99,8 @@ export async function createInquiry(_previousState, formData) {
     select: { id: true },
   });
 
-  const phone = getWhatsAppPhone();
+  // User listings go to the seller, dealer cars to the dealer number.
+  const phone = car.owner?.phone ?? getWhatsAppPhone();
   let whatsappUrl = null;
 
   if (phone) {
