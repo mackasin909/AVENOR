@@ -275,8 +275,64 @@
   text-align: center;
   color: var(--muted);
 
-  a {
+  // Plain text links only; styled buttons keep their own colors.
+  a:not([class]) {
     color: var(--ink);
+  }
+}
+
+// Call-to-action button in the style of the welcome screen "start" button:
+// thin lines above and below, and a fill that sweeps in from the left.
+.ctaButton {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 200px;
+  padding: 9px 24px;
+
+  border: none;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  background-color: transparent;
+
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    color 0.5s ease,
+    border-color 0.4s ease;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-color: var(--ink);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s ease;
+  }
+
+  &:hover,
+  &:focus-visible {
+    color: var(--surface);
+
+    &::before {
+      transform: scaleX(1);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 5px;
   }
 }
 

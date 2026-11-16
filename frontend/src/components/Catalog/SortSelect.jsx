@@ -31,19 +31,27 @@ export default function SortSelect({ value }) {
 
   return (
     <label className={styles.sort}>
-      <span>Sort by</span>
-      <select
-        value={value}
-        onChange={handleChange}
-        disabled={isPending}
-        aria-busy={isPending}
-      >
-        {SORT_OPTIONS.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+      <span className={styles.sortLabel}>Sort by</span>
+      <span className={styles.sortSelect}>
+        <select
+          value={value}
+          onChange={handleChange}
+          disabled={isPending}
+          aria-busy={isPending}
+        >
+          {SORT_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <path
+            fillRule="evenodd"
+            d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"
+          />
+        </svg>
+      </span>
     </label>
   );
 }

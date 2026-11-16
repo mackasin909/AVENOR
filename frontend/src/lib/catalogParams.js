@@ -1,6 +1,6 @@
 // Catalog URL parameters, shared by server (queries) and client (controls).
 
-export const PAGE_SIZE = 6;
+export const PAGE_SIZE = 9;
 
 export const SORT_OPTIONS = [
   { value: "featured", label: "Featured" },

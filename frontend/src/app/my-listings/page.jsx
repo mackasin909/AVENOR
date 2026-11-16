@@ -24,7 +24,7 @@ export default async function MyListingsPage() {
       <div className="container">
         <div className={styles.head}>
           <h1 className={styles.title}>My listings</h1>
-          <Link href="/my-listings/new" className={styles.button}>
+          <Link href="/my-listings/new" className={styles.ctaButton}>
             Sell a car
           </Link>
         </div>
@@ -43,7 +43,7 @@ export default async function MyListingsPage() {
           <div className={styles.empty}>
             <p>You have no listings yet.</p>
             <br />
-            <Link href="/my-listings/new" className={styles.button}>
+            <Link href="/my-listings/new" className={styles.ctaButton}>
               List your first car
             </Link>
           </div>
