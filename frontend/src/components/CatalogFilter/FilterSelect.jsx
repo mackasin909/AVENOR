@@ -10,9 +10,20 @@ export default function FilterSelect({
   isOpen,
   onToggle,
   onSelect,
-  onClose
+  onClose,
+  // false = no "all / any" choice at the top (e.g. sorting).
+  includeEmpty = true,
 }) {
   const optionsId = useId();
+
+  // Options are plain strings or { value, label } objects.
+  const items = [
+    ...(includeEmpty ? [{ value: "", label: placeholder }] : []),
+    ...options.map((option) =>
+      typeof option === "string" ? { value: option, label: option } : option
+    ),
+  ];
+  const selected = items.find((item) => item.value === value);
 
   const selectRef = useRef(null);
 
@@ -41,7 +52,7 @@ export default function FilterSelect({
         aria-expanded={isOpen}
         aria-controls={optionsId}
       >
-        {value || placeholder}
+        {(value && selected?.label) || placeholder}
 
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -70,8 +81,8 @@ export default function FilterSelect({
           backgroundColor: "var(--background, #fff)",
         }}
       >
-        {["", ...options].map((option, index) => (
-          <div key={option}>
+        {items.map((item, index) => (
+          <div key={item.value}>
             {index > 0 && <hr />}
 
             <button
@@ -83,10 +94,10 @@ export default function FilterSelect({
                 font: "inherit",
                 cursor: "pointer",
               }}
-              aria-pressed={option === value}
-              onClick={() => onSelect(option)}
+              aria-pressed={item.value === value}
+              onClick={() => onSelect(item.value)}
             >
-              {option || placeholder}
+              {item.label}
             </button>
           </div>
         ))}
