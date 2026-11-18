@@ -1,5 +1,6 @@
 import { getCurrentUser } from "@/lib/auth";
 import CarEditor from "@/components/CarEditor/CarEditor";
+import { isBlobEnabled } from "@/lib/uploads";
 import LoginPrompt from "@/components/LoginPrompt/LoginPrompt";
 import styles from "@/styles/panel.module.scss";
 
@@ -21,6 +22,7 @@ export default async function NewListingPage() {
           <h1 className={styles.title}>Sell a car</h1>
         </div>
         <CarEditor
+          useBlob={isBlobEnabled()}
           cancelHref="/my-listings"
           note="Your listing will appear in the catalog after our team approves it. Buyers will contact you on WhatsApp at your account phone number."
         />

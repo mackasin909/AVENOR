@@ -9,6 +9,8 @@ import { FUEL_TYPES } from "@/lib/catalogParams";
 import {
   MAX_IMAGES_PER_CAR,
   deleteUploadedImages,
+  isBlobEnabled,
+  isBlobUrl,
   saveCarImage,
 } from "@/lib/uploads";
 
@@ -72,7 +74,18 @@ export async function saveCar(_previousState, formData) {
 
   const id = Number(formData.get("id")) || null;
   const { values, errors } = readCarFields(formData);
-  const fail = (extra = {}) => ({ ok: false, errors: { ...errors, ...extra }, values });
+
+  // Photos the browser already uploaded to Vercel Blob (production).
+  const blobUrls = isBlobEnabled()
+    ? [...new Set(formData.getAll("uploadedImage").map(String))].filter(isBlobUrl)
+    : [];
+
+  // On failure the form is reset, so photos uploaded for this attempt are
+  // removed again; the user picks them once more.
+  const fail = async (extra = {}) => {
+    await deleteUploadedImages(blobUrls);
+    return { ok: false, errors: { ...errors, ...extra }, values };
+  };
 
   let existing = null;
   if (id) {
@@ -96,7 +109,7 @@ export async function saveCar(_previousState, formData) {
     .getAll("photos")
     .filter((file) => typeof file === "object" && file !== null && file.size > 0);
 
-  const total = keptUrls.length + newFiles.length;
+  const total = keptUrls.length + blobUrls.length + newFiles.length;
   if (total === 0) errors.photos = "Add at least one photo";
   if (total > MAX_IMAGES_PER_CAR) {
     errors.photos = `Up to ${MAX_IMAGES_PER_CAR} photos per car`;
@@ -114,7 +127,7 @@ export async function saveCar(_previousState, formData) {
     uploadedUrls.push(result.url);
   }
 
-  const imageRows = [...keptUrls, ...uploadedUrls].map((url, position) => ({
+  const imageRows = [...keptUrls, ...blobUrls, ...uploadedUrls].map((url, position) => ({
     url,
     position,
   }));

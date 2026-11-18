@@ -2,13 +2,10 @@
 //   npm run make-admin -- <username or phone>
 //   npm run make-admin -- <username or phone> --revoke
 import "dotenv/config";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaClient } from "../src/generated/prisma/client";
+import { createAdapter } from "../src/lib/dbAdapter.js";
 
-const adapter = new PrismaBetterSqlite3({
-  url: process.env.DATABASE_URL ?? "file:./prisma/dev.db",
-});
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient({ adapter: createAdapter() });
 
 async function main() {
   const [identifier, flag] = process.argv.slice(2);

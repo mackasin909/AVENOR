@@ -19,8 +19,52 @@ function Field({ label, error, children }) {
   );
 }
 
-export default function CarEditor({ car = null, cancelHref, note }) {
-  const [state, action, pending] = useActionState(saveCar, null);
+function safeFileName(name) {
+  return String(name || "photo").replace(/[^A-Za-z0-9._-]+/g, "-").slice(-80);
+}
+
+// `useBlob` (set by the page when Vercel Blob is configured): the browser
+// uploads selected photos straight to Blob and the form sends their URLs,
+// which keeps requests under Vercel's body size limit.
+export default function CarEditor({ car = null, cancelHref, note, useBlob = false }) {
+  const [uploading, setUploading] = useState(false);
+
+  async function submit(previousState, formData) {
+    if (useBlob) {
+      const files = formData
+        .getAll("photos")
+        .filter((file) => typeof file === "object" && file.size > 0);
+      formData.delete("photos");
+
+      if (files.length > 0) {
+        setUploading(true);
+        try {
+          const { upload } = await import("@vercel/blob/client");
+          for (const file of files) {
+            const blob = await upload(`cars/${safeFileName(file.name)}`, file, {
+              access: "public",
+              handleUploadUrl: "/api/upload",
+              contentType: file.type,
+            });
+            formData.append("uploadedImage", blob.url);
+          }
+        } catch (error) {
+          console.error("Photo upload failed", error);
+          return {
+            ok: false,
+            errors: { photos: error?.message || "Could not upload photos" },
+            values: Object.fromEntries(formData),
+          };
+        } finally {
+          setUploading(false);
+        }
+      }
+    }
+
+    return saveCar(previousState, formData);
+  }
+
+  const [state, action, pending] = useActionState(submit, null);
   const [keptImages, setKeptImages] = useState(car?.images ?? []);
   const [previews, setPreviews] = useState([]);
   const [fileError, setFileError] = useState("");
@@ -258,7 +302,7 @@ export default function CarEditor({ car = null, cancelHref, note }) {
 
       <div className={styles.actions}>
         <button type="submit" className={styles.button} disabled={pending || Boolean(fileError)}>
-          {pending ? "Saving…" : car ? "Save changes" : "Publish listing"}
+          {uploading ? "Uploading photos…" : pending ? "Saving…" : car ? "Save changes" : "Publish listing"}
         </button>
         {cancelHref && (
           <Link href={cancelHref} className={styles.buttonSecondary}>

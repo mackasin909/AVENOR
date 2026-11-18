@@ -60,15 +60,44 @@ export function isUploadedUrl(url) {
   return typeof url === "string" && url.startsWith(PUBLIC_PREFIX);
 }
 
-// Deletes our own uploaded files; external URLs are ignored.
+// ---------- Vercel Blob (production) ----------
+//
+// On Vercel the disk is temporary and requests are limited to ~4.5 MB, so
+// the browser uploads photos straight to Vercel Blob (app/api/upload) and
+// the form only sends back the resulting URLs. Enabled when the Blob store
+// token is configured; otherwise photos are saved to uploads/ as above.
+
+export const BLOB_CONTENT_TYPES = Object.values(CONTENT_TYPES);
+
+export function isBlobEnabled() {
+  return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+}
+
+export function isBlobUrl(url) {
+  try {
+    const { protocol, hostname } = new URL(url);
+    return protocol === "https:" && hostname.endsWith(".public.blob.vercel-storage.com");
+  } catch {
+    return false;
+  }
+}
+
+// Deletes our own uploaded files (local or Blob); external URLs are ignored.
 export async function deleteUploadedImages(urls) {
-  await Promise.all(
-    urls.filter(isUploadedUrl).map(async (url) => {
+  const blobUrls = isBlobEnabled() ? urls.filter(isBlobUrl) : [];
+
+  await Promise.all([
+    ...urls.filter(isUploadedUrl).map(async (url) => {
       const name = url.slice(PUBLIC_PREFIX.length);
       if (!FILE_NAME_RE.test(name)) return;
       await unlink(path.join(CARS_DIR, name)).catch(() => {});
-    })
-  );
+    }),
+    blobUrls.length > 0
+      ? import("@vercel/blob")
+          .then(({ del }) => del(blobUrls))
+          .catch((error) => console.error("Failed to delete blobs", error))
+      : null,
+  ]);
 }
 
 // Returns { bytes, contentType } or null.

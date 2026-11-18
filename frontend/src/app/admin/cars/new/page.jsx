@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import CarEditor from "@/components/CarEditor/CarEditor";
+import { isBlobEnabled } from "@/lib/uploads";
 import styles from "@/styles/panel.module.scss";
 
 export default async function AdminNewCarPage() {
@@ -12,6 +13,7 @@ export default async function AdminNewCarPage() {
         <h1 className={styles.title}>Add a car</h1>
       </div>
       <CarEditor
+        useBlob={isBlobEnabled()}
         cancelHref="/admin/cars"
         note="Cars added by an admin are published as dealer listings right away."
       />
