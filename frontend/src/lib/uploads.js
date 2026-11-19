@@ -33,8 +33,18 @@ function detectExtension(bytes) {
   return null;
 }
 
+// Hosting with a read-only, temporary disk (Vercel) cannot keep uploads in
+// the uploads/ folder; photos then need Vercel Blob (BLOB_READ_WRITE_TOKEN).
+const STORAGE_MISSING_ERROR =
+  "Photo storage is not set up on this server. Connect a Vercel Blob store to the project and redeploy.";
+
 // Returns { url } or { error }.
 export async function saveCarImage(file) {
+  if (process.env.VERCEL && !isBlobEnabled()) {
+    console.error("Photo upload failed: BLOB_READ_WRITE_TOKEN is not set on Vercel");
+    return { error: STORAGE_MISSING_ERROR };
+  }
+
   if (!file || typeof file.arrayBuffer !== "function" || file.size === 0) {
     return { error: "Empty file" };
   }
@@ -50,8 +60,15 @@ export async function saveCarImage(file) {
   }
 
   const name = `${randomUUID()}.${extension}`;
-  await mkdir(CARS_DIR, { recursive: true });
-  await writeFile(path.join(CARS_DIR, name), bytes);
+
+  try {
+    await mkdir(CARS_DIR, { recursive: true });
+    await writeFile(path.join(CARS_DIR, name), bytes);
+  } catch (error) {
+    // e.g. a read-only disk: report it in the form instead of a 500 page.
+    console.error("Failed to save photo to disk", error);
+    return { error: STORAGE_MISSING_ERROR };
+  }
 
   return { url: `${PUBLIC_PREFIX}${name}` };
 }
