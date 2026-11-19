@@ -1,6 +1,8 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
+import { cache } from "react";
 import { PAGE_SIZE } from "@/lib/catalogParams";
+import { correctWord, tokenize } from "@/lib/fuzzy";
 
 const carInclude = {
   images: {
@@ -46,24 +48,61 @@ function range(min, max) {
   return Object.keys(filter).length > 0 ? filter : undefined;
 }
 
-function searchWhere(search) {
-  const words = search.toLowerCase().split(/\s+/).filter(Boolean).slice(0, 8);
+const SEARCH_FIELDS = ["brand", "model", "location", "fuelType", "engine", "gearbox"];
 
-  // Every word must match at least one field (SQLite LIKE is
-  // case-insensitive for latin letters).
-  return words.map((word) => {
-    const or = ["brand", "model", "location", "fuelType", "engine", "gearbox"].map(
-      (field) => ({ [field]: { contains: word } })
+// All words of the approved cars, for correcting typos. Built once per
+// request (the catalog is small, so one light query is enough).
+const getSearchVocabulary = cache(async () => {
+  const cars = await prisma.car.findMany({
+    where: PUBLIC,
+    select: Object.fromEntries(SEARCH_FIELDS.map((field) => [field, true])),
+  });
+
+  return [
+    ...new Set(
+      cars.flatMap((car) => tokenize(SEARCH_FIELDS.map((field) => car[field]).join(" ")))
+    ),
+  ];
+});
+
+// Splits the query into words and replaces typos with catalog words.
+// Returns the words to search for and the corrected query to show
+// ("porhe 911" → "porsche 911"), or null when nothing was corrected.
+export async function resolveSearch(search) {
+  const words = search.toLowerCase().split(/\s+/).filter(Boolean).slice(0, 8);
+  if (words.length === 0) return { words: [], corrected: null };
+
+  const vocabulary = await getSearchVocabulary();
+  const resolved = words.map((word) => ({ word, ...correctWord(word, vocabulary) }));
+  const anyCorrected = resolved.some((item) => item.corrected);
+
+  return {
+    words: resolved,
+    corrected: anyCorrected
+      ? resolved.map((item) => (item.corrected ? item.terms[0] : item.word)).join(" ")
+      : null,
+  };
+}
+
+function searchWhere(words) {
+  // Every word must match at least one field; a corrected word may match
+  // any of its close catalog words (SQLite LIKE is case-insensitive for
+  // latin letters).
+  return words.map(({ terms }) => {
+    const or = terms.flatMap((term) =>
+      SEARCH_FIELDS.map((field) => ({ [field]: { contains: term } }))
     );
 
-    if (/^\d{4}$/.test(word)) or.push({ year: Number(word) });
+    for (const term of terms) {
+      if (/^\d{4}$/.test(term)) or.push({ year: Number(term) });
+    }
 
     return { OR: or };
   });
 }
 
-export function buildCatalogWhere(filters) {
-  const and = [PUBLIC, ...searchWhere(filters.search)];
+export function buildCatalogWhere(filters, words = []) {
+  const and = [PUBLIC, ...searchWhere(words)];
 
   if (filters.brand) and.push({ brand: filters.brand });
   if (filters.brand && filters.model) and.push({ model: filters.model });
@@ -81,7 +120,8 @@ export function buildCatalogWhere(filters) {
 }
 
 export async function searchCatalog(filters) {
-  const where = buildCatalogWhere(filters);
+  const search = await resolveSearch(filters.search);
+  const where = buildCatalogWhere(filters, search.words);
   const total = await prisma.car.count({ where });
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const page = Math.min(filters.page, pageCount);
@@ -94,7 +134,13 @@ export async function searchCatalog(filters) {
     take: PAGE_SIZE,
   });
 
-  return { cars: rows.map(toCar), total, page, pageCount };
+  return {
+    cars: rows.map(toCar),
+    total,
+    page,
+    pageCount,
+    correctedQuery: search.corrected,
+  };
 }
 
 // Options and bounds for the filter panel (approved cars only).

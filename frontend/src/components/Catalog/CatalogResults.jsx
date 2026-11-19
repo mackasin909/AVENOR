@@ -10,16 +10,27 @@ export default function CatalogResults({
   page,
   pageCount,
   query,
+  correctedQuery = null,
   sort,
   params,
 }) {
+  // Typos were fixed: show what was actually searched for.
+  const shownQuery = correctedQuery ?? query;
+
   return (
     <div className={styles.catalogResults}>
       <div className={styles.resultsTop}>
-        <p className={styles.info}>
-          {total} car{total === 1 ? "" : "s"}
-          {query ? ` for “${query}”` : ""}
-        </p>
+        <div>
+          <p className={styles.info}>
+            {total} car{total === 1 ? "" : "s"}
+            {shownQuery ? ` for “${shownQuery}”` : ""}
+          </p>
+          {correctedQuery && (
+            <p className={styles.correction}>
+              Showing results for <strong>{correctedQuery}</strong> instead of “{query}”
+            </p>
+          )}
+        </div>
 
         <SortSelect value={sort} />
       </div>

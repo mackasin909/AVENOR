@@ -145,3 +145,14 @@
 .pageGap {
   border: none !important;
 }
+
+.correction {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--muted);
+
+  strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+}

@@ -31,6 +31,7 @@ export default async function Catalog({ searchParams }) {
             page={result.page}
             pageCount={result.pageCount}
             query={filters.search}
+            correctedQuery={result.correctedQuery}
             sort={filters.sort}
             params={params}
           />
