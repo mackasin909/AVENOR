@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import AccountNav from "@/components/AccountNav/AccountNav";
 import CatalogCard from "@/components/CatalogCard/CatalogCard";
 import useFavorites from "@/context/FavoritesContext";
 import useSession from "@/context/SessionContext";
@@ -35,6 +36,8 @@ export default function FavoritesList({ cars }) {
             </button>
           )}
         </div>
+
+        {user && <AccountNav isAdmin={user.role === "admin"} />}
 
         {!user ? (
           <div className={styles.emptyMessage}>

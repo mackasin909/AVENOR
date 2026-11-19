@@ -1,6 +1,8 @@
 .catalog{
     width: 100%;
     min-height: 100vh;
+    // Room for the fixed header when jumping to #catalog.
+    scroll-margin-top: 90px;
 }
 
 .title{
@@ -118,7 +120,7 @@
     min-width: 36px;
     padding: 6px 10px;
     border: 1px solid var(--border);
-    border-radius: 4px;
+    border-radius: 999px;
     color: var(--ink);
     text-align: center;
     text-decoration: none;

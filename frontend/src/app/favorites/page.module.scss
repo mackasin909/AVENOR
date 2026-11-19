@@ -100,7 +100,12 @@
   align-items: start;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
+}
+
+// Same spacing above the section pills as on the other account pages.
+.header .title {
+  margin-bottom: 0;
 }
 
 .title {

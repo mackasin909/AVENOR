@@ -26,3 +26,26 @@ body::-webkit-scrollbar {
   --muted: #747B79;
   --ink: #17191B;
 }
+
+// Smooth hover / focus changes for every button and link. Components that
+// define their own `transition` keep it (a class beats these selectors).
+button,
+a,
+[role="button"],
+input[type="submit"],
+input[type="button"] {
+  transition:
+    color 0.3s ease,
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    opacity 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button,
+  a,
+  [role="button"] {
+    transition: none;
+  }
+}

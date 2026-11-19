@@ -28,13 +28,17 @@ export default function HeaderField({
   }
 
   function goToCatalog(query) {
-    const url = query ? `/?search=${encodeURIComponent(query)}` : "/";
-
     if (pathname === "/") {
-      router.replace(url, { scroll: false });
-    } else {
-      router.push(url, { scroll: false });
+      router.replace(
+        query ? `/?search=${encodeURIComponent(query)}` : "/",
+        { scroll: false }
+      );
+      return;
     }
+
+    // From any other page: open the home page right at the catalog. The
+    // `search` param (even empty) tells the home page to skip the intro.
+    router.push(`/?search=${encodeURIComponent(query)}#catalog`);
   }
 
   function handleSubmit(event) {

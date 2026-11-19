@@ -5,11 +5,17 @@ import Welcome from "@/components/Welcome/Welcome";
 import { getFeaturedCars } from "@/lib/cars";
 
 export default async function Home({ searchParams }) {
-  const bannerCars = await getFeaturedCars(4);
+  const [bannerCars, params] = await Promise.all([
+    getFeaturedCars(4),
+    searchParams,
+  ]);
+
+  // A search from the header lands straight on the catalog, without the intro.
+  const fromSearch = typeof params?.search === "string";
 
   return (
     <div className="home">
-      <Welcome />
+      <Welcome skip={fromSearch} />
       <Banner cars={bannerCars} />
       <Catalog searchParams={searchParams} />
       <RecentlyViewed />

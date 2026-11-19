@@ -3,8 +3,17 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import styles from "./Welcome.module.scss";
 
-export default function Welcome() {
+// `skip`: the visitor came to the catalog from a search on another page,
+// so the intro is not shown. Once skipped it stays hidden for this visit.
+export default function Welcome({ skip = false }) {
   const [finished, setFinished] = useState(false);
+  const [skipped, setSkipped] = useState(skip);
+
+  if (skip && !skipped) {
+    setSkipped(true);
+  }
+
+  const done = finished || skipped;
 
   const welcomeRef = useRef(null);
   const goNextRef = useRef(() => {});
@@ -19,6 +28,9 @@ export default function Welcome() {
   }, [finished]);
 
   useEffect(() => {
+    // Without the intro, keep the browser's own scrolling (e.g. to #catalog).
+    if (skipped) return;
+
     const previousRestoration = window.history.scrollRestoration;
 
     window.history.scrollRestoration = "manual";
@@ -38,10 +50,10 @@ export default function Welcome() {
       window.history.scrollRestoration = previousRestoration;
       window.removeEventListener("pageshow", scrollToTop);
     };
-  }, []);
+  }, [skipped]);
 
   useEffect(() => {
-    if (finished) return;
+    if (done) return;
 
     const welcome = welcomeRef.current;
     if (!welcome) return;
@@ -179,9 +191,9 @@ export default function Welcome() {
       window.removeEventListener("scroll", updateAppearance);
       window.removeEventListener("resize", updateAppearance);
     };
-  }, [finished]);
+  }, [done]);
 
-  if (finished) return null;
+  if (done) return null;
 
   return (
     <section id="welcome" ref={welcomeRef} className={styles.welcome}>
