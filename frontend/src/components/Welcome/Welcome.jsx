@@ -166,11 +166,28 @@ export default function Welcome({ skip = false }) {
         }
     }
 
+    // Phones: no swiping past the intro (or pull-to-refresh / bounce);
+    // the visitor continues with the "start" button.
+    function onTouchMove(event) {
+      if (event.touches.length > 1) return; // keep pinch-zoom
+
+      if (window.scrollY <= 5 || scrolling) {
+        event.preventDefault();
+      }
+    }
+
+    const html = document.documentElement;
+    const previousOverscroll = html.style.overscrollBehaviorY;
+    html.style.overscrollBehaviorY = "none";
+
     goNextRef.current = goNext;
 
     updateAppearance();
 
     window.addEventListener("wheel", onWheel, {
+      passive: false,
+    });
+    window.addEventListener("touchmove", onTouchMove, {
       passive: false,
     });
     window.addEventListener("scroll", updateAppearance, {
@@ -185,9 +202,11 @@ export default function Welcome({ skip = false }) {
       }
 
       goNextRef.current = () => {};
+      html.style.overscrollBehaviorY = previousOverscroll;
 
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("scroll", updateAppearance);
       window.removeEventListener("resize", updateAppearance);
     };

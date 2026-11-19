@@ -3,8 +3,10 @@
 
   width: 100%;
   height: 100vh;
-  /* Mobile browsers: visible height without the address bar. */
-  height: 100svh;
+  /* Mobile browsers: exactly the visible screen, address bar or not. */
+  height: 100dvh;
+  /* No panning gestures on the intro (taps on "start" still work). */
+  touch-action: none;
   position: relative;
   overflow: hidden;
   background: url("/images/welcome-bg.png");

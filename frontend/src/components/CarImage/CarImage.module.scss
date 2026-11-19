@@ -178,3 +178,41 @@
     }
   }
 }
+
+// Big photo fades in when a thumbnail is chosen.
+.mainImage {
+  animation: photoFade 0.35s ease;
+}
+
+@keyframes photoFade {
+  from {
+    opacity: 0.4;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+// Thumbnails swap into the big photo, so they point instead of zooming.
+.thumbButton {
+  cursor: pointer;
+
+  img {
+    transition: opacity 0.3s ease;
+  }
+
+  &:hover img {
+    opacity: 0.8;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mainImage {
+    animation: none;
+  }
+}
+
+.wrapper .mainImage {
+  cursor: zoom-in;
+}

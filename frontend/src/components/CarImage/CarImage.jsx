@@ -9,8 +9,23 @@ import CompareButton from "@/components/Compare/CompareButton";
 export default function CarImage({ car }) {
   const { isFavorite: checkFavorite, toggleFavorite } = useFavorites()
 
+  // Up to 5 photos: order[0] is the big one, the rest are thumbnails.
+  // Clicking a thumbnail swaps it with the big photo; clicking the big
+  // photo opens it full screen.
+  const [order, setOrder] = useState(() => car.images.slice(0, 5))
+  const mainImage = order[0]
+  const thumbnails = order.slice(1)
+
   const [selectedImage, setSelectedImage] = useState(null)
   const isOpen = selectedImage !== null
+
+  function showAsMain(position) {
+    setOrder((current) => {
+      const next = [...current]
+      ;[next[0], next[position]] = [next[position], next[0]]
+      return next
+    })
+  }
 
   const isFavorite = checkFavorite(car.id)
 
@@ -61,24 +76,25 @@ export default function CarImage({ car }) {
       <button
         type="button"
         className={styles.imageButton}
-        onClick={() => setSelectedImage(car.images[0])}
-        aria-label="Open main photo"
+        onClick={() => setSelectedImage(mainImage)}
+        aria-label="Open photo full screen"
       >
         <img
-          src={car.images[0]}
+          key={mainImage}
+          src={mainImage}
           alt={car.name}
           className={styles.mainImage}
         />
       </button>
 
       <div className={styles.imagesBlock}>
-        {car.images.slice(1, 5).map((image, index) => (
+        {thumbnails.map((image, index) => (
           <button
             type="button"
             key={image}
-            className={styles.imageButton}
-            onClick={() => setSelectedImage(image)}
-            aria-label={`Open photo ${index + 2}`}
+            className={`${styles.imageButton} ${styles.thumbButton}`}
+            onClick={() => showAsMain(index + 1)}
+            aria-label={`Show photo ${index + 2} as the main photo`}
           >
             <img
               src={image}

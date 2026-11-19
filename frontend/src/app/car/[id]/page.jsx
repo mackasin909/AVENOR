@@ -31,7 +31,7 @@ export default async function ProductPage({ params }) {
               : `This listing was rejected${car.statusNote ? `: ${car.statusNote}` : "."}`}
           </p>
         )}
-        <CarImage car={car}/>
+        <CarImage key={car.id} car={car} />
         <div className={styles.infoMain}>
           <div className={styles.carInfo}>
             <div className={styles.infoBlock}>
