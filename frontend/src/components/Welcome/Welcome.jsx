@@ -3,6 +3,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import styles from "./Welcome.module.scss";
 
+// Dark tone of welcome-bg.png, used around the intro on phones.
+const INTRO_BACKGROUND = "#050608";
+
 // `skip`: the visitor came to the catalog from a search on another page,
 // so the intro is not shown. Once skipped it stays hidden for this visit.
 export default function Welcome({ skip = false }) {
@@ -180,6 +183,13 @@ export default function Welcome({ skip = false }) {
     const previousOverscroll = html.style.overscrollBehaviorY;
     html.style.overscrollBehaviorY = "none";
 
+    // Phone browsers tint the status bar / toolbar area from the page
+    // background; keep it dark like the intro instead of the light page.
+    const previousHtmlBackground = html.style.backgroundColor;
+    const previousBodyBackground = document.body.style.backgroundColor;
+    html.style.backgroundColor = INTRO_BACKGROUND;
+    document.body.style.backgroundColor = INTRO_BACKGROUND;
+
     goNextRef.current = goNext;
 
     updateAppearance();
@@ -203,6 +213,8 @@ export default function Welcome({ skip = false }) {
 
       goNextRef.current = () => {};
       html.style.overscrollBehaviorY = previousOverscroll;
+      html.style.backgroundColor = previousHtmlBackground;
+      document.body.style.backgroundColor = previousBodyBackground;
 
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("wheel", onWheel);
