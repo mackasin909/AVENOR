@@ -73,13 +73,42 @@ export function isBlobEnabled() {
   return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
 }
 
-export function isBlobUrl(url) {
+// Host of OUR Blob store. The read-write token looks like
+// vercel_blob_rw_<storeId>_<secret> (the same parsing @vercel/blob uses), and
+// public files are served from https://<storeId>.public.blob.vercel-storage.com.
+function getBlobStoreHost() {
+  const [, , , storeId = ""] = String(process.env.BLOB_READ_WRITE_TOKEN ?? "").split("_");
+  return storeId ? `${storeId}.public.blob.vercel-storage.com`.toLowerCase() : null;
+}
+
+// Every user uploads into their own folder; /api/upload enforces it, so a
+// file in cars/<id>/ was uploaded by user <id>.
+export function blobUploadPrefix(userId) {
+  return `cars/${userId}/`;
+}
+
+function parseBlobUrl(url) {
+  const host = getBlobStoreHost();
+  if (!host) return null;
+
   try {
-    const { protocol, hostname } = new URL(url);
-    return protocol === "https:" && hostname.endsWith(".public.blob.vercel-storage.com");
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:" || parsed.hostname.toLowerCase() !== host) return null;
+    return parsed;
   } catch {
-    return false;
+    return null;
   }
+}
+
+// A file in our Blob store (any other host is not ours to delete).
+export function isBlobUrl(url) {
+  return parseBlobUrl(url) !== null;
+}
+
+// A file in our store that this user uploaded.
+export function isOwnBlobUrl(url, userId) {
+  const parsed = parseBlobUrl(url);
+  return Boolean(parsed) && parsed.pathname.startsWith(`/${blobUploadPrefix(userId)}`);
 }
 
 // Deletes our own uploaded files (local or Blob); external URLs are ignored.

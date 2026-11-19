@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getEditableCar } from "@/lib/cars";
 import CarEditor from "@/components/CarEditor/CarEditor";
-import { isBlobEnabled } from "@/lib/uploads";
+import { blobUploadPrefix, isBlobEnabled } from "@/lib/uploads";
 import LoginPrompt from "@/components/LoginPrompt/LoginPrompt";
 import styles from "@/styles/panel.module.scss";
 
@@ -24,6 +24,7 @@ export default async function EditListingPage({ params }) {
         </div>
         <CarEditor
           useBlob={isBlobEnabled()}
+          uploadPrefix={blobUploadPrefix(user.id)}
           car={car}
           cancelHref="/my-listings"
           note="After you save, the listing goes back to review before it shows in the catalog again."

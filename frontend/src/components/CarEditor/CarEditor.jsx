@@ -26,7 +26,14 @@ function safeFileName(name) {
 // `useBlob` (set by the page when Vercel Blob is configured): the browser
 // uploads selected photos straight to Blob and the form sends their URLs,
 // which keeps requests under Vercel's body size limit.
-export default function CarEditor({ car = null, cancelHref, note, useBlob = false }) {
+// `uploadPrefix`: the user's own Blob folder (cars/<id>/), from the page.
+export default function CarEditor({
+  car = null,
+  cancelHref,
+  note,
+  useBlob = false,
+  uploadPrefix = "",
+}) {
   const [uploading, setUploading] = useState(false);
 
   async function submit(previousState, formData) {
@@ -41,7 +48,7 @@ export default function CarEditor({ car = null, cancelHref, note, useBlob = fals
         try {
           const { upload } = await import("@vercel/blob/client");
           for (const file of files) {
-            const blob = await upload(`cars/${safeFileName(file.name)}`, file, {
+            const blob = await upload(`${uploadPrefix}${safeFileName(file.name)}`, file, {
               access: "public",
               handleUploadUrl: "/api/upload",
               contentType: file.type,

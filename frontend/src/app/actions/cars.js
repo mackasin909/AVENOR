@@ -10,7 +10,7 @@ import {
   MAX_IMAGES_PER_CAR,
   deleteUploadedImages,
   isBlobEnabled,
-  isBlobUrl,
+  isOwnBlobUrl,
   saveCarImage,
 } from "@/lib/uploads";
 
@@ -75,13 +75,32 @@ export async function saveCar(_previousState, formData) {
   const id = Number(formData.get("id")) || null;
   const { values, errors } = readCarFields(formData);
 
-  // Photos the browser already uploaded to Vercel Blob (production).
-  const blobUrls = isBlobEnabled()
-    ? [...new Set(formData.getAll("uploadedImage").map(String))].filter(isBlobUrl)
+  // Photos the browser already uploaded to Vercel Blob (production). Only
+  // files this user uploaded to OUR store, and not used by any listing yet,
+  // are accepted: a form cannot claim (and later delete) someone else's photo.
+  const submittedBlobUrls = isBlobEnabled()
+    ? [...new Set(formData.getAll("uploadedImage").map(String))]
     : [];
+  const ownBlobUrls = submittedBlobUrls.filter((url) => isOwnBlobUrl(url, user.id));
+  const usedUrls = ownBlobUrls.length
+    ? new Set(
+        (
+          await prisma.carImage.findMany({
+            where: { url: { in: ownBlobUrls } },
+            select: { url: true },
+          })
+        ).map((image) => image.url)
+      )
+    : new Set();
+  const blobUrls = ownBlobUrls.filter((url) => !usedUrls.has(url));
+
+  if (blobUrls.length !== submittedBlobUrls.length) {
+    errors.photos = "Some photos could not be used, please choose them again";
+  }
 
   // On failure the form is reset, so photos uploaded for this attempt are
-  // removed again; the user picks them once more.
+  // removed again; the user picks them once more. Only the files that passed
+  // the checks above are ever deleted here.
   const fail = async (extra = {}) => {
     await deleteUploadedImages(blobUrls);
     return { ok: false, errors: { ...errors, ...extra }, values };

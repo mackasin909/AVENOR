@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import {
   BLOB_CONTENT_TYPES,
   MAX_IMAGE_BYTES,
+  blobUploadPrefix,
   isBlobEnabled,
 } from "@/lib/uploads";
 
@@ -22,7 +23,13 @@ export async function POST(request) {
       onBeforeGenerateToken: async (pathname) => {
         const user = await getCurrentUser();
         if (!user) throw new Error("Please log in to upload photos");
-        if (!pathname.startsWith("cars/")) throw new Error("Invalid upload path");
+
+        // Only into the user's own folder (see blobUploadPrefix).
+        const prefix = blobUploadPrefix(user.id);
+        const rest = pathname.slice(prefix.length);
+        if (!pathname.startsWith(prefix) || rest === "" || rest.includes("/")) {
+          throw new Error("Invalid upload path");
+        }
 
         return {
           allowedContentTypes: BLOB_CONTENT_TYPES,

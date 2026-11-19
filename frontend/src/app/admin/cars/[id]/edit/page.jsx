@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { getEditableCar } from "@/lib/cars";
 import CarEditor from "@/components/CarEditor/CarEditor";
-import { isBlobEnabled } from "@/lib/uploads";
+import { blobUploadPrefix, isBlobEnabled } from "@/lib/uploads";
 import styles from "@/styles/panel.module.scss";
 
 export default async function AdminEditCarPage({ params }) {
@@ -18,7 +18,12 @@ export default async function AdminEditCarPage({ params }) {
       <div className={styles.head}>
         <h1 className={styles.title}>Edit {car.year} {car.name}</h1>
       </div>
-      <CarEditor car={car} cancelHref="/admin/cars" useBlob={isBlobEnabled()} />
+      <CarEditor
+        car={car}
+        cancelHref="/admin/cars"
+        useBlob={isBlobEnabled()}
+        uploadPrefix={blobUploadPrefix(admin.id)}
+      />
     </>
   );
 }
