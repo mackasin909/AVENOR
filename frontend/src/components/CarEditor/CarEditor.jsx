@@ -62,6 +62,7 @@ export default function CarEditor({
           }
         } catch (error) {
           console.error("Photo upload failed", error);
+          clearPreviews();
           return {
             ok: false,
             errors: { photos: error?.message || "Could not upload photos" },
@@ -73,7 +74,13 @@ export default function CarEditor({
       }
     }
 
-    return saveCar(previousState, formData);
+    const result = await saveCar(previousState, formData);
+
+    // React empties the file input after a failed save, so drop the old
+    // previews too: the photos have to be chosen again.
+    if (result && !result.ok) clearPreviews();
+
+    return result;
   }
 
   const [state, action, pending] = useActionState(submit, null);
