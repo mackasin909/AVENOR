@@ -180,7 +180,14 @@ export default function CarEditor({
               />
             </Field>
             <Field label="Fuel type" error={errors.fuelType}>
-              <select name="fuelType" defaultValue={values.fuelType ?? ""} required>
+              {/* key: React does not re-apply a select's defaultValue after the
+                  form resets, so rebuild it with the restored value. */}
+              <select
+                key={`fuel-${values.fuelType ?? ""}`}
+                name="fuelType"
+                defaultValue={values.fuelType ?? ""}
+                required
+              >
                 <option value="" disabled>Choose…</option>
                 {FUEL_TYPES.map((fuel) => (
                   <option key={fuel} value={fuel}>{fuel}</option>

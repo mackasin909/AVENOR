@@ -10,6 +10,7 @@ import {
   MAX_IMAGES_PER_CAR,
   deleteUploadedImages,
   isBlobEnabled,
+  describeBlobChecks,
   isOwnBlobUrl,
   saveCarImage,
 } from "@/lib/uploads";
@@ -94,8 +95,14 @@ export async function saveCar(_previousState, formData) {
     : new Set();
   const blobUrls = ownBlobUrls.filter((url) => !usedUrls.has(url));
 
-  if (blobUrls.length !== submittedBlobUrls.length) {
-    errors.photos = "Some photos could not be used, please choose them again";
+  const rejectedBlobUrls = submittedBlobUrls.filter((url) => !blobUrls.includes(url));
+  if (rejectedBlobUrls.length > 0) {
+    // Store host and folder are part of every photo URL, nothing secret here.
+    console.warn("Rejected uploaded photo URLs", {
+      rejected: rejectedBlobUrls,
+      alreadyUsed: rejectedBlobUrls.filter((url) => usedUrls.has(url)),
+      ...describeBlobChecks(user.id),
+    });
   }
 
   // On failure the form is reset, so photos uploaded for this attempt are
@@ -132,6 +139,10 @@ export async function saveCar(_previousState, formData) {
   if (total === 0) errors.photos = "Add at least one photo";
   if (total > MAX_IMAGES_PER_CAR) {
     errors.photos = `Up to ${MAX_IMAGES_PER_CAR} photos per car`;
+  }
+  // The more specific reason wins over "Add at least one photo".
+  if (rejectedBlobUrls.length > 0) {
+    errors.photos = "Some photos could not be used, please choose them again";
   }
 
   if (Object.keys(errors).length > 0) return fail();

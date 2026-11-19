@@ -147,6 +147,15 @@ export function isBlobUrl(url) {
   return parseBlobUrl(url) !== null;
 }
 
+// What isOwnBlobUrl() expects, for server logs when a photo is rejected.
+export function describeBlobChecks(userId) {
+  return {
+    mode: getBlobMode(),
+    expectedHost: getBlobStoreHost(),
+    expectedPathPrefix: `/${blobUploadPrefix(userId)}`,
+  };
+}
+
 // A file in our store that this user uploaded.
 export function isOwnBlobUrl(url, userId) {
   const parsed = parseBlobUrl(url);
