@@ -34,14 +34,14 @@ function detectExtension(bytes) {
 }
 
 // Hosting with a read-only, temporary disk (Vercel) cannot keep uploads in
-// the uploads/ folder; photos then need Vercel Blob (BLOB_READ_WRITE_TOKEN).
+// the uploads/ folder; photos then need a connected Vercel Blob store.
 const STORAGE_MISSING_ERROR =
   "Photo storage is not set up on this server. Connect a Vercel Blob store to the project and redeploy.";
 
 // Returns { url } or { error }.
 export async function saveCarImage(file) {
   if (process.env.VERCEL && !isBlobEnabled()) {
-    console.error("Photo upload failed: BLOB_READ_WRITE_TOKEN is not set on Vercel");
+    console.error("Photo upload failed: no Vercel Blob store is connected (BLOB_STORE_ID or BLOB_READ_WRITE_TOKEN)");
     return { error: STORAGE_MISSING_ERROR };
   }
 
@@ -81,20 +81,45 @@ export function isUploadedUrl(url) {
 //
 // On Vercel the disk is temporary and requests are limited to ~4.5 MB, so
 // the browser uploads photos straight to Vercel Blob (app/api/upload) and
-// the form only sends back the resulting URLs. Enabled when the Blob store
-// token is configured; otherwise photos are saved to uploads/ as above.
+// the form only sends back the resulting URLs. Otherwise photos are saved to
+// uploads/ as above.
+//
+// Two ways a Blob store can be connected to the project:
+// - "token":     BLOB_READ_WRITE_TOKEN (older setup) → upload() / handleUpload()
+// - "presigned": BLOB_STORE_ID + BLOB_WEBHOOK_PUBLIC_KEY (current Vercel
+//                setup, authenticated with Vercel OIDC) →
+//                uploadPresigned() / handleUploadPresigned()
 
 export const BLOB_CONTENT_TYPES = Object.values(CONTENT_TYPES);
 
-export function isBlobEnabled() {
-  return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+export function getBlobMode() {
+  if (process.env.BLOB_READ_WRITE_TOKEN) return "token";
+  if (process.env.BLOB_STORE_ID) return "presigned";
+  return null;
 }
 
-// Host of OUR Blob store. The read-write token looks like
-// vercel_blob_rw_<storeId>_<secret> (the same parsing @vercel/blob uses), and
-// public files are served from https://<storeId>.public.blob.vercel-storage.com.
+export function isBlobEnabled() {
+  return getBlobMode() !== null;
+}
+
+// ID of OUR Blob store, parsed the same way @vercel/blob does: from the
+// read-write token (vercel_blob_rw_<storeId>_<secret>) or BLOB_STORE_ID
+// (with an optional "store_" prefix).
+function getBlobStoreId() {
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  if (token) {
+    const [, , , storeId = ""] = token.split("_");
+    return storeId || null;
+  }
+
+  const storeId = String(process.env.BLOB_STORE_ID ?? "").trim();
+  if (!storeId) return null;
+  return storeId.startsWith("store_") ? storeId.slice("store_".length) : storeId;
+}
+
+// Public files are served from https://<storeId>.public.blob.vercel-storage.com.
 function getBlobStoreHost() {
-  const [, , , storeId = ""] = String(process.env.BLOB_READ_WRITE_TOKEN ?? "").split("_");
+  const storeId = getBlobStoreId();
   return storeId ? `${storeId}.public.blob.vercel-storage.com`.toLowerCase() : null;
 }
 

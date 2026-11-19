@@ -1,6 +1,6 @@
 import { getCurrentUser } from "@/lib/auth";
 import CarEditor from "@/components/CarEditor/CarEditor";
-import { blobUploadPrefix, isBlobEnabled } from "@/lib/uploads";
+import { blobUploadPrefix, getBlobMode } from "@/lib/uploads";
 import LoginPrompt from "@/components/LoginPrompt/LoginPrompt";
 import styles from "@/styles/panel.module.scss";
 
@@ -22,7 +22,7 @@ export default async function NewListingPage() {
           <h1 className={styles.title}>Sell a car</h1>
         </div>
         <CarEditor
-          useBlob={isBlobEnabled()}
+          blobMode={getBlobMode()}
           uploadPrefix={blobUploadPrefix(user.id)}
           cancelHref="/my-listings"
           note="Your listing will appear in the catalog after our team approves it. Buyers will contact you on WhatsApp at your account phone number."

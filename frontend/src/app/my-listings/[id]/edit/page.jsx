@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getEditableCar } from "@/lib/cars";
 import CarEditor from "@/components/CarEditor/CarEditor";
-import { blobUploadPrefix, isBlobEnabled } from "@/lib/uploads";
+import { blobUploadPrefix, getBlobMode } from "@/lib/uploads";
 import LoginPrompt from "@/components/LoginPrompt/LoginPrompt";
 import styles from "@/styles/panel.module.scss";
 
@@ -23,7 +23,7 @@ export default async function EditListingPage({ params }) {
           <h1 className={styles.title}>Edit {car.year} {car.name}</h1>
         </div>
         <CarEditor
-          useBlob={isBlobEnabled()}
+          blobMode={getBlobMode()}
           uploadPrefix={blobUploadPrefix(user.id)}
           car={car}
           cancelHref="/my-listings"

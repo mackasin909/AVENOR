@@ -62,9 +62,12 @@ use the local database again.
 
 1. In the project open **Storage → Create → Blob**, create a store and
    connect it to the project (all environments).
-2. Vercel adds `BLOB_READ_WRITE_TOKEN` automatically.
+2. Vercel adds the variables automatically — nothing to paste. Current
+   projects get `BLOB_STORE_ID` and `BLOB_WEBHOOK_PUBLIC_KEY` (authenticated
+   through Vercel OIDC); older ones get `BLOB_READ_WRITE_TOKEN`. The site
+   supports both.
 3. Go to **Deployments**, open the latest one → **⋯ → Redeploy** so the new
-   variable is picked up.
+   variables are picked up.
 
 ## 5. Make yourself admin
 

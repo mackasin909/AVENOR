@@ -19,25 +19,28 @@ function Field({ label, error, children }) {
   );
 }
 
-function safeFileName(name) {
-  return String(name || "photo").replace(/[^A-Za-z0-9._-]+/g, "-").slice(-80);
+// Unique, URL-safe file name, e.g. "3f2a…-front-view.jpg".
+function blobFileName(name) {
+  const safe = String(name || "photo").replace(/[^A-Za-z0-9._-]+/g, "-").slice(-60);
+  return `${crypto.randomUUID()}-${safe}`;
 }
 
-// `useBlob` (set by the page when Vercel Blob is configured): the browser
-// uploads selected photos straight to Blob and the form sends their URLs,
-// which keeps requests under Vercel's body size limit.
+// `blobMode` (set by the page when a Vercel Blob store is connected:
+// "token" or "presigned", see lib/uploads.js): the browser uploads selected
+// photos straight to Blob and the form sends their URLs, which keeps
+// requests under Vercel's body size limit.
 // `uploadPrefix`: the user's own Blob folder (cars/<id>/), from the page.
 export default function CarEditor({
   car = null,
   cancelHref,
   note,
-  useBlob = false,
+  blobMode = null,
   uploadPrefix = "",
 }) {
   const [uploading, setUploading] = useState(false);
 
   async function submit(previousState, formData) {
-    if (useBlob) {
+    if (blobMode) {
       const files = formData
         .getAll("photos")
         .filter((file) => typeof file === "object" && file.size > 0);
@@ -46,9 +49,11 @@ export default function CarEditor({
       if (files.length > 0) {
         setUploading(true);
         try {
-          const { upload } = await import("@vercel/blob/client");
+          const { upload, uploadPresigned } = await import("@vercel/blob/client");
+          const send = blobMode === "presigned" ? uploadPresigned : upload;
+
           for (const file of files) {
-            const blob = await upload(`${uploadPrefix}${safeFileName(file.name)}`, file, {
+            const blob = await send(`${uploadPrefix}${blobFileName(file.name)}`, file, {
               access: "public",
               handleUploadUrl: "/api/upload",
               contentType: file.type,
