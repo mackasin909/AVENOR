@@ -107,3 +107,94 @@
   text-transform: uppercase;
   color: var(--ink);
 }
+
+// ---------- Responsive layout ----------
+
+.carInfo {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+// Small laptops: the specs wrap instead of running off the page.
+@media (max-width: 1200px) {
+  .stats {
+    flex-wrap: wrap;
+    column-gap: 40px;
+    row-gap: 20px;
+  }
+}
+
+// Tablets: the inquiry form moves below the car details, full width.
+@media (max-width: 1024px) {
+  .infoMain {
+    flex-direction: column;
+    align-items: stretch;
+    row-gap: 40px;
+  }
+}
+
+@media (max-width: 600px) {
+  .carPage {
+    padding-top: 80px;
+  }
+
+  .carInfo {
+    row-gap: 22px;
+  }
+
+  .infoBlock {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    row-gap: 10px;
+    padding-bottom: 16px;
+
+    & h4 {
+      font-size: 24px;
+    }
+  }
+
+  .block {
+    & h2 {
+      font-size: 22px;
+      line-height: 1.25;
+    }
+
+    & p {
+      font-size: 15px;
+    }
+  }
+
+  // Specs as a tidy two-column grid.
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 16px;
+    width: 100%;
+
+    & div {
+      min-width: 0;
+
+      & p,
+      & span {
+        font-size: 15px;
+      }
+    }
+  }
+
+  .about h4 {
+    font-size: 20px;
+  }
+
+  .about p {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .similar {
+    padding-top: 40px;
+  }
+
+  .sectionTitle {
+    font-size: 20px;
+  }
+}

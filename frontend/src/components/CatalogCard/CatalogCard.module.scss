@@ -191,3 +191,11 @@
     transition: none;
   }
 }
+// Phones: each card shows only its main photo (no arrows or counter; the
+// card slider does not respond to swipes either).
+@media (max-width: 600px) {
+  .arrow,
+  .counter {
+    display: none;
+  }
+}

@@ -140,3 +140,41 @@
   line-height: 1;
   cursor: pointer;
 }
+// Phones: big main photo with a single row of thumbnails, and the
+// Save / Share / Compare buttons in a row below instead of over a photo.
+@media (max-width: 600px) {
+  .wrapper {
+    gap: 6px;
+    border-radius: 10px;
+    overflow: visible;
+  }
+
+  .mainImage {
+    border-radius: 10px;
+  }
+
+  .imagesBlock {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: auto;
+    gap: 6px;
+
+    & img {
+      aspect-ratio: 1;
+      border-radius: 6px;
+    }
+  }
+
+  .buttonBlock {
+    position: static;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+
+    & button {
+      padding: 8px 16px;
+      border: 1px solid var(--border);
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+  }
+}

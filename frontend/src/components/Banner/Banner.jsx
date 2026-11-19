@@ -36,11 +36,13 @@ function Arrow({ direction }) {
 export default function Banner({ cars = [] }) {
     const bannerCars = cars.slice(0, 4)
     const swiperRef = useRef(null)
+    const paginationRef = useRef(null)
     const [activeIndex, setActiveIndex] = useState(0)
 
     if (bannerCars.length === 0) return null
 
     const hasMultipleCars = bannerCars.length > 1
+    const pad = (value) => String(value).padStart(2, "0")
 
     return (
         <section
@@ -75,6 +77,15 @@ export default function Banner({ cars = [] }) {
                                 onSlideChange={(swiper) => {
                                     setActiveIndex(swiper.realIndex)
                                 }}
+                                // Fills the active pagination line in step with
+                                // autoplay (written to a CSS variable, no re-render).
+                                onAutoplayTimeLeft={(_swiper, _time, progress) => {
+                                    paginationRef.current?.style.setProperty(
+                                        "--progress",
+                                        String(1 - progress)
+                                    )
+                                }}
+                                grabCursor
                                 slidesPerView={1}
                                 spaceBetween={10}
                                 speed={500}
@@ -123,12 +134,16 @@ export default function Banner({ cars = [] }) {
 
                                             <div className={styles.slideContent}>
                                                 <span className={styles.badge}>
-                                                    The Avenor collection
+                                                    {pad(index + 1)} / {pad(bannerCars.length)}
                                                 </span>
 
                                                 <h2>
                                                     {car.brand} {car.model}
                                                 </h2>
+
+                                                <p className={styles.price}>
+                                                    $ {Number(car.price).toLocaleString("en-US")}
+                                                </p>
 
                                                 <p>
                                                     {[
@@ -184,6 +199,7 @@ export default function Banner({ cars = [] }) {
 
                         {hasMultipleCars && (
                             <div
+                                ref={paginationRef}
                                 className={styles.pagination}
                                 aria-label="Choose a car"
                             >

@@ -48,7 +48,7 @@ export default async function ProductPage({ params }) {
                   <span>Year</span>
                 </div>
                 <div>
-                  <p>{car.mileage} MI</p>
+                  <p>{Number(car.mileage).toLocaleString("en-US")} MI</p>
                   <span>Mileage</span>
                 </div>
                 <div>

@@ -109,3 +109,26 @@
         opacity: 0.85;
     }
 }
+
+// Below laptops the form sits under the car details at full width.
+@media (max-width: 1024px) {
+  .carForm {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .carForm {
+    padding: 16px;
+  }
+
+  .formTop {
+    margin-bottom: 14px;
+
+    & img {
+      width: 44px;
+      height: 44px;
+    }
+  }
+}

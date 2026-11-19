@@ -406,3 +406,208 @@
         right: 8px;
     }
 }
+// ---------- Refined slider (overrides the base styles above) ----------
+
+// Side slides sit slightly back so the active one stands out.
+.slideItem {
+    opacity: 0.45;
+    transform: scale(0.94);
+    transition:
+        opacity 600ms ease,
+        transform 600ms ease;
+
+    &:global(.swiper-slide-active) {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.slide {
+    box-shadow: 0 18px 40px -22px rgb(0 0 0 / 55%);
+}
+
+// Slow zoom on the active photo while it is shown.
+.slideItem:global(.swiper-slide-active) .slideImage {
+    animation: bannerZoom 6s ease-out both;
+}
+
+@keyframes bannerZoom {
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.07);
+    }
+}
+
+// Text rises in when a slide becomes active.
+.slideItem:global(.swiper-slide-active) .slideContent > * {
+    animation: bannerRise 600ms ease both;
+
+    &:nth-child(2) {
+        animation-delay: 80ms;
+    }
+
+    &:nth-child(3) {
+        animation-delay: 160ms;
+    }
+
+    &:nth-child(4) {
+        animation-delay: 240ms;
+    }
+
+    &:nth-child(5) {
+        animation-delay: 320ms;
+    }
+}
+
+@keyframes bannerRise {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+// Slide counter "01 / 04" in a frosted chip.
+.badge {
+    padding: 5px 10px;
+    border: 1px solid rgb(255 255 255 / 25%);
+    border-radius: 999px;
+    background: rgb(255 255 255 / 12%);
+    backdrop-filter: blur(6px);
+    font-size: 10px;
+    letter-spacing: 2px;
+}
+
+.price {
+    margin: 2px 0 0;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #fff;
+    text-shadow: 0 1px 8px rgb(0 0 0 / 50%);
+}
+
+.details {
+    padding: 8px 18px;
+    border-color: rgb(255 255 255 / 55%);
+    background: rgb(255 255 255 / 10%);
+    backdrop-filter: blur(6px);
+    transition:
+        background 300ms ease,
+        color 300ms ease,
+        border-color 300ms ease;
+
+    span {
+        transition: transform 300ms ease;
+    }
+
+    &:hover {
+        background: #fff;
+        border-color: #fff;
+        color: #111;
+
+        span {
+            transform: translateX(4px);
+        }
+    }
+}
+
+// Frosted glass arrows.
+.arrow {
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgb(255 255 255 / 40%);
+    background: rgb(255 255 255 / 18%);
+    color: #fff;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 16px rgb(0 0 0 / 18%);
+    transition:
+        background 300ms ease,
+        color 300ms ease,
+        transform 300ms ease;
+
+    &:hover {
+        background: #fff;
+        color: #111;
+    }
+
+    &:active {
+        transform: translateY(-50%) scale(0.92);
+    }
+}
+
+// Pagination: slim lines; the active one fills while autoplay counts down
+// (--progress is set from Banner.jsx).
+.pagination {
+    gap: 6px;
+    height: 32px;
+}
+
+.dot {
+    position: relative;
+    width: auto;
+    height: 32px;
+
+    &::before {
+        width: 18px;
+        height: 3px;
+        border-radius: 3px;
+        background: #d6d2ce;
+        transition:
+            width 400ms ease,
+            background 300ms ease;
+    }
+
+    &:hover::before {
+        background: #a9a49f;
+    }
+}
+
+.dotActive {
+    &::before {
+        width: 44px;
+        background: #d6d2ce;
+    }
+
+    &::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: calc(44px * var(--progress, 0));
+        height: 3px;
+        border-radius: 3px;
+        background: #111;
+        transform: translateY(-50%);
+    }
+}
+
+// Phones: no arrows, the slider is swiped with a finger.
+@media (max-width: 639px) {
+    .controls {
+        display: none;
+    }
+
+    .slideItem {
+        transform: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .slideItem,
+    .slideItem:global(.swiper-slide-active) {
+        transform: none;
+    }
+
+    .slideItem:global(.swiper-slide-active) .slideImage,
+    .slideItem:global(.swiper-slide-active) .slideContent > * {
+        animation: none;
+    }
+}
