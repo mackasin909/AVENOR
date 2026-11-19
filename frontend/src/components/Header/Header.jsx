@@ -122,12 +122,20 @@ export default function Header() {
         <div className="container">
           <div className={styles.headerWrapper}>
             <nav className={styles.headerNav}>
-              <Link href="/">
-                <img
-                  src="/images/logo.png"
-                  alt="Logo"
-                  className={styles.logo}
-                />
+              <Link href="/" aria-label="AVENOR — home">
+                {/* Phones get the compact emblem; the media query matches
+                    the 600px breakpoint in Header.module.scss. */}
+                <picture>
+                  <source
+                    media="(max-width: 600px)"
+                    srcSet="/images/mini-logo.png"
+                  />
+                  <img
+                    src="/images/logo.png"
+                    alt="AVENOR"
+                    className={styles.logo}
+                  />
+                </picture>
               </Link>
 
               {/* <ul className={styles.headerList}>

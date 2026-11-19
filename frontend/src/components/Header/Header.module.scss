@@ -180,8 +180,12 @@
     padding-block: 10px;
   }
 
+  // Square mini-logo.png (swapped in by <picture> in Header.jsx).
   .logo {
-    max-width: 112px;
+    width: 36px;
+    height: 36px;
+    max-width: none;
+    object-fit: contain;
   }
 
   .headerIcons {
