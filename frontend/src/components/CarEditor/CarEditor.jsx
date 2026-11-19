@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useState } from "react";
 import { saveCar } from "@/app/actions/cars";
 import { FUEL_TYPES } from "@/lib/catalogParams";
 import styles from "@/styles/panel.module.scss";
@@ -38,14 +38,19 @@ export default function CarEditor({
   uploadPrefix = "",
 }) {
   const [uploading, setUploading] = useState(false);
+  // Photos picked in this session. Each pick adds to the list (the browser's
+  // file input would replace the previous pick), and the list survives a
+  // failed save.
+  const [newPhotos, setNewPhotos] = useState([]);
 
   async function submit(previousState, formData) {
-    if (blobMode) {
-      const files = formData
-        .getAll("photos")
-        .filter((file) => typeof file === "object" && file.size > 0);
-      formData.delete("photos");
+    const files = newPhotos.map((photo) => photo.file);
+    formData.delete("photos");
 
+    if (!blobMode) {
+      // Local disk: the files go to the server action with the form.
+      files.forEach((file) => formData.append("photos", file));
+    } else {
       if (files.length > 0) {
         setUploading(true);
         try {
@@ -62,7 +67,6 @@ export default function CarEditor({
           }
         } catch (error) {
           console.error("Photo upload failed", error);
-          clearPreviews();
           return {
             ok: false,
             errors: { photos: error?.message || "Could not upload photos" },
@@ -74,55 +78,56 @@ export default function CarEditor({
       }
     }
 
-    const result = await saveCar(previousState, formData);
-
-    // React empties the file input after a failed save, so drop the old
-    // previews too: the photos have to be chosen again.
-    if (result && !result.ok) clearPreviews();
-
-    return result;
+    // On failure the picked photos stay in the list, so the next try sends
+    // them again without choosing them anew.
+    return saveCar(previousState, formData);
   }
 
   const [state, action, pending] = useActionState(submit, null);
   const [keptImages, setKeptImages] = useState(car?.images ?? []);
-  const [previews, setPreviews] = useState([]);
   const [fileError, setFileError] = useState("");
-  const fileInputRef = useRef(null);
 
   const errors = state?.errors ?? {};
   // After a failed save, show what the user typed; otherwise the car's data.
   const values = state?.values ?? car ?? {};
-
-  function clearPreviews() {
-    previews.forEach((preview) => URL.revokeObjectURL(preview.url));
-    setPreviews([]);
-  }
+  const photoCount = keptImages.length + newPhotos.length;
 
   function handleFiles(event) {
-    const files = [...event.target.files];
-    clearPreviews();
+    const picked = [...event.target.files];
+    // Empty the input so the same file can be picked again later; the list
+    // below is what gets saved.
+    event.target.value = "";
     setFileError("");
 
-    const tooBig = files.find((file) => file.size > MAX_BYTES);
-    if (tooBig) {
-      setFileError(`${tooBig.name} is larger than 8 MB`);
-      event.target.value = "";
-      return;
-    }
-    if (files.length + keptImages.length > MAX_PHOTOS) {
-      setFileError(`Up to ${MAX_PHOTOS} photos per car`);
-      event.target.value = "";
-      return;
+    const accepted = [];
+    for (const file of picked) {
+      if (file.size > MAX_BYTES) {
+        setFileError(`${file.name} is larger than 8 MB`);
+        continue;
+      }
+      if (photoCount + accepted.length >= MAX_PHOTOS) {
+        setFileError(`Up to ${MAX_PHOTOS} photos per car`);
+        break;
+      }
+      accepted.push({
+        id: crypto.randomUUID(),
+        file,
+        url: URL.createObjectURL(file),
+      });
     }
 
-    setPreviews(
-      files.map((file) => ({ name: file.name, url: URL.createObjectURL(file) }))
-    );
+    if (accepted.length > 0) {
+      setNewPhotos((current) => [...current, ...accepted]);
+    }
   }
 
-  function resetFiles() {
-    clearPreviews();
-    if (fileInputRef.current) fileInputRef.current.value = "";
+  function removeNew(id) {
+    setNewPhotos((current) => {
+      const photo = current.find((item) => item.id === id);
+      if (photo) URL.revokeObjectURL(photo.url);
+      return current.filter((item) => item.id !== id);
+    });
+    setFileError("");
   }
 
   function removeKept(url) {
@@ -290,31 +295,40 @@ export default function CarEditor({
           </>
         )}
 
-        <Field label="Add photos" error={fileError || errors.photos}>
+        <Field
+          label={`Add photos (${photoCount} / ${MAX_PHOTOS})`}
+          error={fileError || errors.photos}
+        >
+          {/* No name: the picked files are kept in state and sent from there. */}
           <input
-            ref={fileInputRef}
-            name="photos"
             type="file"
             accept="image/jpeg,image/png,image/webp"
             multiple
+            disabled={photoCount >= MAX_PHOTOS}
             onChange={handleFiles}
           />
         </Field>
 
-        {previews.length > 0 && (
+        {newPhotos.length > 0 && (
           <>
             <br />
             <div className={styles.photos}>
-              {previews.map((preview) => (
-                <div key={preview.url} className={styles.photo}>
-                  <img src={preview.url} alt={preview.name} />
+              {newPhotos.map((photo, index) => (
+                <div key={photo.id} className={styles.photo}>
+                  <img src={photo.url} alt={photo.file.name} />
+                  {keptImages.length === 0 && index === 0 && (
+                    <span className={styles.photoMain}>Main</span>
+                  )}
+                  <button
+                    type="button"
+                    aria-label={`Remove ${photo.file.name}`}
+                    onClick={() => removeNew(photo.id)}
+                  >
+                    ×
+                  </button>
                 </div>
               ))}
             </div>
-            <br />
-            <button type="button" className={`${styles.buttonSecondary} ${styles.buttonSmall}`} onClick={resetFiles}>
-              Clear selected photos
-            </button>
           </>
         )}
       </div>
@@ -322,12 +336,12 @@ export default function CarEditor({
       {errors.form && <p className={styles.error} role="alert">{errors.form}</p>}
       {state && !state.ok && !errors.form && (
         <p className={styles.error} role="alert">
-          Please fix the highlighted fields{errors.photos ? "" : " (photos you selected need to be chosen again)"}.
+          Please fix the highlighted fields.
         </p>
       )}
 
       <div className={styles.actions}>
-        <button type="submit" className={styles.button} disabled={pending || Boolean(fileError)}>
+        <button type="submit" className={styles.button} disabled={pending}>
           {uploading ? "Uploading photos…" : pending ? "Saving…" : car ? "Save changes" : "Publish listing"}
         </button>
         {cancelHref && (
