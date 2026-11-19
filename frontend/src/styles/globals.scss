@@ -5,6 +5,15 @@ html,
 body {
   scrollbar-width: none;
   background-color: var(--backgroung);
+  transition: background-color 0.8s ease;
+}
+
+// While the welcome intro is on screen the page background is dark, so phone
+// browsers tint the status bar / toolbar area to match. When "start" is
+// pressed Welcome.jsx sets data-leaving and the colour fades back to light.
+html:has(#welcome:not([data-leaving])),
+html:has(#welcome:not([data-leaving])) body {
+  background-color: #050608;
 }
 
 html::-webkit-scrollbar,
@@ -47,5 +56,16 @@ input[type="button"] {
   a,
   [role="button"] {
     transition: none;
+  }
+}
+
+// Touch screens: iPhone Safari zooms the page into any field whose text is
+// smaller than 16px when it is focused. Keeping fields at 16px+ prevents
+// that without disabling pinch-zoom for the visitor.
+@media (pointer: coarse) {
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1em) !important;
   }
 }

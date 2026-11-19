@@ -3,9 +3,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import styles from "./Welcome.module.scss";
 
-// Dark tone of welcome-bg.png, used around the intro on phones.
-const INTRO_BACKGROUND = "#050608";
-
 // `skip`: the visitor came to the catalog from a search on another page,
 // so the intro is not shown. Once skipped it stays hidden for this visit.
 export default function Welcome({ skip = false }) {
@@ -185,18 +182,11 @@ export default function Welcome({ skip = false }) {
     const previousOverscroll = html.style.overscrollBehaviorY;
     html.style.overscrollBehaviorY = "none";
 
-    // Phone browsers tint the status bar / toolbar area from the page
-    // background; keep it dark like the intro instead of the light page.
-    const previousHtmlBackground = html.style.backgroundColor;
-    const previousBodyBackground = document.body.style.backgroundColor;
-    html.style.backgroundColor = INTRO_BACKGROUND;
-    document.body.style.backgroundColor = INTRO_BACKGROUND;
-
-    // Back to the light page background (as soon as "start" is pressed, so
-    // the page scrolling in is not shown on black).
+    // The page background is dark while the intro is shown (globals.scss,
+    // `html:has(#welcome)`). Marking the intro as leaving fades it back to
+    // the light background as soon as "start" is pressed.
     function restoreBackground() {
-      html.style.backgroundColor = previousHtmlBackground;
-      document.body.style.backgroundColor = previousBodyBackground;
+      welcome.dataset.leaving = "true";
     }
 
     goNextRef.current = goNext;
@@ -222,7 +212,6 @@ export default function Welcome({ skip = false }) {
 
       goNextRef.current = () => {};
       html.style.overscrollBehaviorY = previousOverscroll;
-      restoreBackground();
 
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("wheel", onWheel);
