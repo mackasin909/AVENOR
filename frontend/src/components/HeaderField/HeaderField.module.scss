@@ -67,3 +67,36 @@
     cursor: pointer;
   }
 }
+// Tablets and small laptops: the search sits between the logo and the
+// icons instead of being centred over the whole header, so they never
+// overlap.
+@media (max-width: 1100px) {
+  .headerField {
+    position: static;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 460px;
+    margin: 0 24px;
+    transform: none;
+
+    &:focus-within {
+      transform: none;
+    }
+
+    input {
+      min-width: 0;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .headerField {
+    margin: 0 12px;
+    padding: 7px 12px;
+    column-gap: 10px;
+
+    input {
+      font-size: 15px;
+    }
+  }
+}

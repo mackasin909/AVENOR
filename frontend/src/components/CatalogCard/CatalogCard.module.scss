@@ -22,7 +22,8 @@
 
 .imageWrapper {
   display: block;
-  height: 220px;
+  // Photos keep their shape at any card width (about 220px tall on laptops).
+  aspect-ratio: 4 / 3;
   overflow: hidden;
 
   & img {

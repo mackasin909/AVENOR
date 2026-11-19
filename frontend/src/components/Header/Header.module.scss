@@ -165,11 +165,39 @@
 
 @media (max-width: 480px) {
   .accountButton {
-    max-width: 96px;
+    max-width: 76px;
     padding: 4px 10px;
   }
 
   .username {
     font-size: 13px;
+  }
+}
+
+// Phones: smaller logo and tighter icons keep the header on one row.
+@media (max-width: 600px) {
+  .headerWrapper {
+    padding-block: 10px;
+  }
+
+  .logo {
+    max-width: 112px;
+  }
+
+  .headerIcons {
+    column-gap: 14px;
+  }
+
+  .headerIcon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .headerIcon p {
+    top: -8px;
+    right: -10px;
+    width: 17px;
+    height: 17px;
+    font-size: 10px;
   }
 }

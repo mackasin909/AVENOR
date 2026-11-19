@@ -265,3 +265,71 @@
     outline-offset: 4px;
   }
 }
+// "Filters" toggle: hidden on laptops, where the panel is always open.
+.filterToggle {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .filter {
+    padding: 0;
+    border: none;
+  }
+
+  .filterToggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 11px 20px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background-color: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+
+    &:hover {
+      border-color: var(--ink);
+    }
+
+    svg {
+      width: 14px;
+      height: 14px;
+      transition: transform 0.3s ease;
+    }
+
+    &[aria-expanded="true"] svg {
+      transform: rotate(180deg);
+    }
+  }
+
+  .filterBody {
+    display: none;
+    margin-top: 12px;
+    padding: 24px 18px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+
+    &[data-open="true"] {
+      display: block;
+    }
+  }
+
+  // The title row duplicates the toggle; keep only "Clear All".
+  .filterTop {
+    justify-content: flex-end;
+
+    .filterTitle {
+      display: none;
+    }
+  }
+
+  .applyButton {
+    margin-top: 28px;
+  }
+}

@@ -25,31 +25,27 @@
   grid-column: 1 / -1;
 }
 
+// Cards per row: col-4 → 3 on laptops, 2 on tablets, 1 on phones;
+// col-3 → 4 on large screens, 2 on tablets, 1 on phones.
+
 @media (max-width: 1200px) {
   .grid {
     grid-template-columns: repeat(8, minmax(0, 1fr));
   }
-}
 
-@media (max-width: 900px) {
-  .grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: bp.$bp-mobile) {
-  .grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .col-5,
-  .col-6,
-  .col-7,
-  .col-8,
-  .col-9,
-  .col-10,
-  .col-11,
-  .col-12 {
+  .col-3 {
     grid-column: span 4;
+  }
+}
+
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  @for $i from 1 through 12 {
+    .col-#{$i} {
+      grid-column: 1 / -1;
+    }
   }
 }
