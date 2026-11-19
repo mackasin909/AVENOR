@@ -24,7 +24,10 @@ export default async function MyListingsPage() {
       <div className="container">
         <div className={styles.head}>
           <h1 className={styles.title}>My listings</h1>
-          <Link href="/my-listings/new" className={styles.ctaButton}>
+          <Link href="/my-listings/new" className={styles.pillButton}>
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+            </svg>
             Sell a car
           </Link>
         </div>

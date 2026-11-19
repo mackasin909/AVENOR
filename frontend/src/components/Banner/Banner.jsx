@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react"
 import { Swiper, SwiperSlide } from "swiper/react"
-import { A11y } from "swiper/modules"
+import { A11y, Autoplay } from "swiper/modules"
 import Link from "next/link"
 
 import "swiper/css"
@@ -65,7 +65,7 @@ export default function Banner({ cars = [] }) {
                         <div className={styles.sliderViewport}>
                             <Swiper
                                 className={styles.slider}
-                                modules={[A11y]}
+                                modules={[A11y, Autoplay]}
                                 onSwiper={(swiper) => {
                                     swiperRef.current = swiper
                                 }}
@@ -80,6 +80,17 @@ export default function Banner({ cars = [] }) {
                                 speed={500}
                                 loop={bannerCars.length >= 3}
                                 watchOverflow
+                                // Next slide every 3 s; pauses while hovered, keeps going after
+                                // the arrows or dots are used.
+                                autoplay={
+                                    hasMultipleCars
+                                        ? {
+                                              delay: 3000,
+                                              disableOnInteraction: false,
+                                              pauseOnMouseEnter: true,
+                                          }
+                                        : false
+                                }
                                 breakpoints={{
                                     640: {
                                         slidesPerView:
