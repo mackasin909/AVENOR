@@ -61,6 +61,25 @@ function readCarFields(formData) {
   return { values, errors };
 }
 
+// The order chosen in the editor: "k:<url>" is a kept photo, "n:<index>"
+// the index-th new photo. Anything missing from the list goes at the end, so
+// a bad or absent order never loses a photo.
+function orderPhotos(order, keptUrls, newUrls) {
+  const ordered = [];
+  for (const entry of order) {
+    const url = entry.startsWith("k:")
+      ? keptUrls.find((kept) => kept === entry.slice(2))
+      : entry.startsWith("n:")
+        ? newUrls[Number(entry.slice(2))]
+        : undefined;
+    if (url && !ordered.includes(url)) ordered.push(url);
+  }
+  for (const url of [...keptUrls, ...newUrls]) {
+    if (!ordered.includes(url)) ordered.push(url);
+  }
+  return ordered;
+}
+
 function canManage(user, car) {
   return user.role === "admin" || (car.ownerId !== null && car.ownerId === user.id);
 }
@@ -157,10 +176,11 @@ export async function saveCar(_previousState, formData) {
     uploadedUrls.push(result.url);
   }
 
-  const imageRows = [...keptUrls, ...blobUrls, ...uploadedUrls].map((url, position) => ({
-    url,
-    position,
-  }));
+  const imageRows = orderPhotos(
+    formData.getAll("photoOrder").map(String),
+    keptUrls,
+    [...blobUrls, ...uploadedUrls]
+  ).map((url, position) => ({ url, position }));
 
   const data = {
     brand: values.brand,

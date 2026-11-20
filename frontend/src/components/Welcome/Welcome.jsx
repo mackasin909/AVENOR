@@ -16,6 +16,7 @@ export default function Welcome({ skip = false }) {
   const done = finished || skipped;
 
   const welcomeRef = useRef(null);
+  const buttonRef = useRef(null);
   const goNextRef = useRef(() => {});
 
   useLayoutEffect(() => {
@@ -63,9 +64,17 @@ export default function Welcome({ skip = false }) {
     );
 
     let scrolling = false;
+    let leaving = false;
     let animationId = null;
 
     function updateAppearance() {
+      // The intro is only left with "start". Anything else that moves the
+      // page (middle-click autoscroll, dragging the scrollbar, focus moving
+      // to a link below) is undone right away.
+      if (!scrolling && !leaving && window.scrollY > 0) {
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      }
+
       const progress = Math.max(
         0,
         Math.min(
@@ -80,6 +89,7 @@ export default function Welcome({ skip = false }) {
     function goNext() {
       if (scrolling || window.scrollY > 5) return;
 
+      leaving = true;
       restoreBackground();
 
       const start = window.scrollY;
@@ -134,6 +144,14 @@ export default function Welcome({ skip = false }) {
     function onKeyDown(event) {
         const target = event.target;
 
+        // Keep keyboard focus on "start": Tab would otherwise jump to links
+        // further down the page and scroll to them behind the intro.
+        if (event.key === "Tab" && !leaving) {
+            event.preventDefault();
+            buttonRef.current?.focus({ preventScroll: true });
+            return;
+        }
+
         // Не мешаем вводу в полях.
         if (
             target instanceof HTMLElement &&
@@ -166,6 +184,13 @@ export default function Welcome({ skip = false }) {
         ) {
             event.preventDefault();
         }
+    }
+
+    // Middle-button autoscroll (Windows/Linux browsers) starts on mousedown.
+    function onMouseDown(event) {
+      if (event.button === 1 && !leaving) {
+        event.preventDefault();
+      }
     }
 
     // Phones: no swiping past the intro (or pull-to-refresh / bounce);
@@ -204,6 +229,7 @@ export default function Welcome({ skip = false }) {
     });
     window.addEventListener("resize", updateAppearance);
     window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("mousedown", onMouseDown);
 
     return () => {
       if (animationId !== null) {
@@ -214,6 +240,7 @@ export default function Welcome({ skip = false }) {
       html.style.overscrollBehaviorY = previousOverscroll;
 
       window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("mousedown", onMouseDown);
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("scroll", updateAppearance);
@@ -241,6 +268,7 @@ export default function Welcome({ skip = false }) {
         <p className={styles.tagline}>the art of driving</p>
 
         <button
+          ref={buttonRef}
           className={styles.welcomeButton}
           type="button"
           onClick={() => goNextRef.current()}

@@ -38,12 +38,19 @@ export default function CarEditor({
   uploadPrefix = "",
 }) {
   const [uploading, setUploading] = useState(false);
-  // Photos picked in this session. Each pick adds to the list (the browser's
+  // All photos in their final order, the first one is the main photo:
+  // { id, url } for the car's current photos and { id, url, file } for
+  // photos picked in this session. Each pick adds to the list (the browser's
   // file input would replace the previous pick), and the list survives a
   // failed save.
-  const [newPhotos, setNewPhotos] = useState([]);
+  const [photos, setPhotos] = useState(() =>
+    (car?.images ?? []).map((url) => ({ id: url, url, file: null }))
+  );
+  const [dragId, setDragId] = useState(null);
+  const newPhotos = photos.filter((photo) => photo.file);
 
   async function submit(previousState, formData) {
+    // Same order as the "n:<index>" entries of photoOrder below.
     const files = newPhotos.map((photo) => photo.file);
     formData.delete("photos");
 
@@ -84,13 +91,12 @@ export default function CarEditor({
   }
 
   const [state, action, pending] = useActionState(submit, null);
-  const [keptImages, setKeptImages] = useState(car?.images ?? []);
   const [fileError, setFileError] = useState("");
 
   const errors = state?.errors ?? {};
   // After a failed save, show what the user typed; otherwise the car's data.
   const values = state?.values ?? car ?? {};
-  const photoCount = keptImages.length + newPhotos.length;
+  const photoCount = photos.length;
 
   function handleFiles(event) {
     const picked = [...event.target.files];
@@ -111,38 +117,54 @@ export default function CarEditor({
       }
       accepted.push({
         id: crypto.randomUUID(),
-        file,
         url: URL.createObjectURL(file),
+        file,
       });
     }
 
     if (accepted.length > 0) {
-      setNewPhotos((current) => [...current, ...accepted]);
+      setPhotos((current) => [...current, ...accepted]);
     }
   }
 
-  function removeNew(id) {
-    setNewPhotos((current) => {
+  function removePhoto(id) {
+    setPhotos((current) => {
       const photo = current.find((item) => item.id === id);
-      if (photo) URL.revokeObjectURL(photo.url);
+      if (photo?.file) URL.revokeObjectURL(photo.url);
       return current.filter((item) => item.id !== id);
     });
     setFileError("");
   }
 
-  function removeKept(url) {
-    setKeptImages((images) => images.filter((image) => image !== url));
+  // Moves a photo to position `to` (0 = main photo).
+  function movePhoto(id, to) {
+    setPhotos((current) => {
+      const from = current.findIndex((item) => item.id === id);
+      if (from === -1 || to < 0 || to >= current.length || from === to) return current;
+      const next = [...current];
+      const [photo] = next.splice(from, 1);
+      next.splice(to, 0, photo);
+      return next;
+    });
   }
 
-  function makeMain(url) {
-    setKeptImages((images) => [url, ...images.filter((image) => image !== url)]);
-  }
+  // Position of each photo among the new ones ("n:<index>"), so the server
+  // can put uploaded files where the user placed them.
+  let newIndex = 0;
+  const photoOrder = photos.map((photo) =>
+    photo.file ? `n:${newIndex++}` : `k:${photo.url}`
+  );
 
   return (
     <form action={action} className={styles.form}>
       {car && <input type="hidden" name="id" value={car.id} />}
-      {keptImages.map((url) => (
-        <input key={url} type="hidden" name="keepImage" value={url} />
+      {photos
+        .filter((photo) => !photo.file)
+        .map((photo) => (
+          <input key={photo.id} type="hidden" name="keepImage" value={photo.url} />
+        ))}
+      {photoOrder.map((entry) => (
+        <input key={entry} type="hidden" name="photoOrder" value={entry} />
       ))}
 
       {note && <p className={styles.muted}>{note}</p>}
@@ -259,42 +281,6 @@ export default function CarEditor({
         </p>
         <br />
 
-        {keptImages.length > 0 && (
-          <>
-            <div className={styles.photos}>
-              {keptImages.map((url, index) => (
-                <div key={url} className={styles.photo}>
-                  <img src={url} alt={`Photo ${index + 1}`} />
-                  {index === 0 ? (
-                    <span className={styles.photoMain}>Main</span>
-                  ) : (
-                    <span
-                      className={styles.photoMain}
-                      role="button"
-                      tabIndex={0}
-                      style={{ cursor: "pointer" }}
-                      onClick={() => makeMain(url)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter") makeMain(url);
-                      }}
-                    >
-                      Make main
-                    </span>
-                  )}
-                  <button
-                    type="button"
-                    aria-label={`Remove photo ${index + 1}`}
-                    onClick={() => removeKept(url)}
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-            <br />
-          </>
-        )}
-
         <Field
           label={`Add photos (${photoCount} / ${MAX_PHOTOS})`}
           error={fileError || errors.photos}
@@ -309,23 +295,74 @@ export default function CarEditor({
           />
         </Field>
 
-        {newPhotos.length > 0 && (
+        {photos.length > 0 && (
           <>
             <br />
+            {photos.length > 1 && (
+              <p className={styles.muted}>
+                Drag photos to reorder them, or use the arrows. Tap
+                “Make main” to put a photo first.
+              </p>
+            )}
             <div className={styles.photos}>
-              {newPhotos.map((photo, index) => (
-                <div key={photo.id} className={styles.photo}>
-                  <img src={photo.url} alt={photo.file.name} />
-                  {keptImages.length === 0 && index === 0 && (
+              {photos.map((photo, index) => (
+                <div
+                  key={photo.id}
+                  className={styles.photo}
+                  data-dragging={dragId === photo.id || undefined}
+                  draggable
+                  onDragStart={(event) => {
+                    event.dataTransfer.effectAllowed = "move";
+                    setDragId(photo.id);
+                  }}
+                  onDragOver={(event) => {
+                    if (!dragId) return;
+                    event.preventDefault();
+                    if (dragId !== photo.id) movePhoto(dragId, index);
+                  }}
+                  onDrop={(event) => event.preventDefault()}
+                  onDragEnd={() => setDragId(null)}
+                >
+                  <img src={photo.url} alt={`Photo ${index + 1}`} draggable={false} />
+                  {index === 0 ? (
                     <span className={styles.photoMain}>Main</span>
+                  ) : (
+                    <button
+                      type="button"
+                      className={styles.photoMain}
+                      onClick={() => movePhoto(photo.id, 0)}
+                    >
+                      Make main
+                    </button>
                   )}
                   <button
                     type="button"
-                    aria-label={`Remove ${photo.file.name}`}
-                    onClick={() => removeNew(photo.id)}
+                    className={styles.photoRemove}
+                    aria-label={`Remove photo ${index + 1}`}
+                    onClick={() => removePhoto(photo.id)}
                   >
                     ×
                   </button>
+                  {photos.length > 1 && (
+                    <div className={styles.photoMove}>
+                      <button
+                        type="button"
+                        aria-label={`Move photo ${index + 1} left`}
+                        disabled={index === 0}
+                        onClick={() => movePhoto(photo.id, index - 1)}
+                      >
+                        ‹
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`Move photo ${index + 1} right`}
+                        disabled={index === photos.length - 1}
+                        onClick={() => movePhoto(photo.id, index + 1)}
+                      >
+                        ›
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
