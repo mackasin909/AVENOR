@@ -6,6 +6,7 @@ import { SessionProvider } from '@/context/SessionContext';
 import { getCurrentUser } from '@/lib/auth';
 import { getFavoriteIds } from '@/lib/cars';
 import CompareBar from '@/components/Compare/CompareBar';
+import RouteLoader from '@/components/RouteLoader/RouteLoader';
 
 const manrope = localFont({
   src: [
@@ -38,6 +39,7 @@ export default async function RootLayout({ children }) {
             <Header />
             <main data-page-content>{children}</main>
             <CompareBar />
+            <RouteLoader />
           </FavoritesProvider>
         </SessionProvider>
       </body>

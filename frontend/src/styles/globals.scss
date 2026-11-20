@@ -9,8 +9,9 @@ body {
 }
 
 // While the welcome intro is on screen the page background is dark, so phone
-// browsers tint the status bar / toolbar area to match. When "start" is
-// pressed Welcome.jsx sets data-leaving and the colour fades back to light.
+// browsers tint the status bar / toolbar area to match. When the page moves
+// on to the catalog Welcome.jsx sets data-leaving and the colour fades back
+// to light (and back to dark when the visitor returns to the intro).
 html:has(#welcome:not([data-leaving])),
 html:has(#welcome:not([data-leaving])) body {
   background-color: #050608;

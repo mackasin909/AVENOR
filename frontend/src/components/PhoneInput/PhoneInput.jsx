@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import {
   DEFAULT_COUNTRY,
   formatNational,
@@ -11,6 +11,8 @@ import {
   splitPhone,
 } from "@/lib/phone";
 import styles from "./PhoneInput.module.scss";
+
+const subscribeNoop = () => () => {};
 
 // Country from the browser language ("ru-KZ" → "KZ"), if we know its code.
 function guessCountry(options) {
@@ -43,6 +45,18 @@ export default function PhoneInput({
   className = "",
 }) {
   const options = useMemo(() => getCountryOptions(), []);
+  // Country names come from the runtime's own language data, which differs
+  // between the server and the browser ("Falkland Islands" vs "Falkland
+  // Islands (Islas Malvinas)"). The server HTML and the first browser render
+  // show ISO codes; the names follow right after.
+  const showNames = useSyncExternalStore(subscribeNoop, () => true, () => false);
+  const listed = useMemo(
+    () =>
+      showNames
+        ? options
+        : [...options].sort((a, b) => (a.code < b.code ? -1 : 1)),
+    [options, showNames]
+  );
 
   const [phone, setPhone] = useState(() => {
     if (defaultValue) return splitPhone(defaultValue);
@@ -102,9 +116,9 @@ export default function PhoneInput({
             onChange={handleCountry}
             aria-label="Country code"
           >
-            {options.map((option) => (
+            {listed.map((option) => (
               <option key={option.code} value={option.code}>
-                {option.name} (+{option.dial})
+                {showNames ? option.name : option.code} (+{option.dial})
               </option>
             ))}
           </select>

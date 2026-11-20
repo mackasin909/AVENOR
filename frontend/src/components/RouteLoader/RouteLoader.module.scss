@@ -1,0 +1,72 @@
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  background: #050608;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  // Fades out slowly; `visibility` waits for the fade before hiding.
+  transition:
+    opacity 0.6s ease,
+    visibility 0s linear 0.6s;
+
+  &[data-visible] {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+      opacity 0.3s ease,
+      visibility 0s;
+  }
+
+  // Without JavaScript the screen must not stay up forever.
+  @media (scripting: none) {
+    display: none;
+  }
+}
+
+.logo {
+  width: clamp(72px, 9vw, 120px);
+  height: auto;
+  user-select: none;
+
+  opacity: 0;
+  transform: scale(0.92);
+  transition:
+    opacity 0.5s ease,
+    transform 0.6s ease;
+
+  .loader[data-visible] & {
+    opacity: 1;
+    transform: scale(1);
+    transition-delay: 0.1s;
+    animation: breathe 1.8s ease-in-out 0.6s infinite;
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.55;
+    transform: scale(0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loader,
+  .loader[data-visible],
+  .logo,
+  .loader[data-visible] .logo {
+    transition-duration: 0.01s;
+    animation: none;
+  }
+}
