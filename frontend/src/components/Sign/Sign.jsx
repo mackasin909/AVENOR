@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useActionState, useState, useTransition } from "react";
 import { toast } from "react-toastify";
 import { logIn, logOut, signUp } from "@/app/actions/auth";
+import PhoneInput from "@/components/PhoneInput/PhoneInput";
+import { formatPhone } from "@/lib/phone";
 import styles from "./Sign.module.scss";
 
 export default function Sign({ user, authState, onClose }) {
@@ -44,6 +46,8 @@ function AuthDialog({ onClose }) {
   }
 
   const [state, formAction, pending] = useActionState(submit, null);
+  // After an error, keep the name and phone (React resets the form).
+  const values = state?.values ?? {};
 
   return (
     <div
@@ -67,8 +71,10 @@ function AuthDialog({ onClose }) {
             </label>
 
             <input
+              key={`username-${values.username ?? ""}`}
               id="sign-username"
               name="username"
+              defaultValue={values.username}
               type="text"
               placeholder="username"
               autoComplete="username"
@@ -84,13 +90,11 @@ function AuthDialog({ onClose }) {
             Phone number
           </label>
 
-          <input
+          <PhoneInput
+            key={`phone-${values.phone ?? ""}`}
             id="sign-phone"
-            name="phone"
-            type="tel"
-            placeholder="XXX XXX XX XX"
-            autoComplete="tel"
-            required
+            defaultValue={values.phone}
+            guessDefault
           />
         </div>
 
@@ -171,7 +175,7 @@ function AccountDialog({ user, onClose }) {
 
         <div className={styles.formBlock}>
           <span className={styles.accountLabel}>Phone number</span>
-          <p className={styles.accountValue}>+{user.phone}</p>
+          <p className={styles.accountValue}>{formatPhone(user.phone)}</p>
         </div>
 
         <nav className={styles.accountLinks} aria-label="Account">

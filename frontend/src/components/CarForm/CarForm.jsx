@@ -1,19 +1,43 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useRef } from "react"
 import { toast } from "react-toastify"
 import { createInquiry } from "@/app/actions/inquiries"
 import { EMAIL_MAX_LENGTH, EMAIL_PATTERN } from "@/lib/validation"
 import styles from "./CarForm.module.scss"
 
-function openWhatsApp(url) {
-    // Usually allowed right after the click; if the browser blocks the
-    // popup, the "Send via WhatsApp" link below is still there.
-    const popup = window.open(url, "_blank")
-    if (popup) popup.opener = null
-}
+// `hasWhatsApp`: the inquiry continues on WhatsApp (decided by the server,
+// see lib/whatsapp.js). `loginForWhatsApp`: a seller's listing viewed by a
+// guest, who can log in to message the seller there.
+export default function CarForm({ carId, hasWhatsApp = false, loginForWhatsApp = false }) {
+    // Browsers block tabs opened after waiting for the server, so the tab
+    // is opened right on the click and pointed at WhatsApp once the request
+    // is saved (or closed if it fails).
+    const popupRef = useRef(null)
 
-export default function CarForm({ carId }) {
+    function handleSubmit() {
+        if (!hasWhatsApp) return
+        const popup = window.open("", "_blank")
+        if (popup) {
+            popup.opener = null
+            popupRef.current = popup
+        }
+    }
+
+    function finishPopup(url) {
+        const popup = popupRef.current
+        popupRef.current = null
+
+        if (url && popup && !popup.closed) {
+            popup.location.href = url
+        } else if (popup && !popup.closed) {
+            popup.close()
+        } else if (url) {
+            // No tab was opened: the "Send via WhatsApp" link below stays.
+            window.open(url, "_blank", "noopener")
+        }
+    }
+
     async function submit(_previousState, formData) {
         const values = {
             name: String(formData.get("name") ?? ""),
@@ -25,15 +49,17 @@ export default function CarForm({ carId }) {
             const result = await createInquiry(null, formData)
 
             if (!result.ok) {
+                finishPopup(null)
                 // Keep what the user typed: React resets the form after an action.
                 return { ...result, values }
             }
 
             toast.success("Request saved")
-            if (result.whatsappUrl) openWhatsApp(result.whatsappUrl)
+            finishPopup(result.whatsappUrl)
 
             return result
         } catch (error) {
+            finishPopup(null)
             console.error("Failed to send inquiry", error)
             return {
                 ok: false,
@@ -54,7 +80,7 @@ export default function CarForm({ carId }) {
                 <h2>Avenor user</h2>
             </div>
 
-            <form action={formAction}>
+            <form action={formAction} onSubmit={handleSubmit}>
                 <input type="hidden" name="carId" value={carId} />
 
                 <input
@@ -105,6 +131,13 @@ export default function CarForm({ carId }) {
                 <button type="submit" disabled={pending}>
                     {pending ? "Sending…" : "Send message"}
                 </button>
+
+                {loginForWhatsApp && (
+                    <p className={styles.hint}>
+                        The seller will see your message in their account. Log in
+                        to also continue the chat on WhatsApp.
+                    </p>
+                )}
             </form>
 
             {state?.ok && (

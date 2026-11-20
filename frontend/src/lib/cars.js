@@ -69,8 +69,18 @@ const getSearchVocabulary = cache(async () => {
 // Returns the words to search for and the corrected query to show
 // ("porhe 911" → "porsche 911"), or null when nothing was corrected.
 export async function resolveSearch(search) {
-  const words = search.toLowerCase().split(/\s+/).filter(Boolean).slice(0, 8);
-  if (words.length === 0) return { words: [], corrected: null };
+  // "%" and "_" would act as LIKE wildcards ("%" matched every car), so
+  // they separate words like spaces do ("e_tron" → "e tron").
+  const words = search
+    .toLowerCase()
+    .replace(/[%_\\]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 8);
+  if (words.length === 0) {
+    // Only symbols were typed: nothing to search for, so nothing matches.
+    return { words: [], corrected: null, nothing: search.trim() !== "" };
+  }
 
   const vocabulary = await getSearchVocabulary();
   const resolved = words.map((word) => ({ word, ...correctWord(word, vocabulary) }));
@@ -121,7 +131,9 @@ export function buildCatalogWhere(filters, words = []) {
 
 export async function searchCatalog(filters) {
   const search = await resolveSearch(filters.search);
-  const where = buildCatalogWhere(filters, search.words);
+  const where = search.nothing
+    ? { id: -1 }
+    : buildCatalogWhere(filters, search.words);
   const total = await prisma.car.count({ where });
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const page = Math.min(filters.page, pageCount);
@@ -187,7 +199,7 @@ export async function getFeaturedCars(take = 4) {
 
 // Public visitors only see approved cars; the owner and admins can also
 // open pending or rejected listings.
-export async function getCarById(id, viewer = null) {
+export const getCarById = cache(async (id, viewer = null) => {
   if (!Number.isInteger(id) || id <= 0) return null;
 
   const row = await prisma.car.findUnique({
@@ -203,7 +215,7 @@ export async function getCarById(id, viewer = null) {
     (viewer && row.ownerId === viewer.id);
 
   return canSee ? toCar(row) : null;
-}
+});
 
 export async function getCarsByIds(ids) {
   const unique = [...new Set(ids)].filter((id) => Number.isInteger(id) && id > 0);
@@ -258,7 +270,7 @@ export async function getFavoriteCars(userId) {
 
 export async function getFavoriteIds(userId) {
   const favorites = await prisma.favorite.findMany({
-    where: { userId },
+    where: { userId, car: PUBLIC },
     orderBy: { createdAt: "asc" },
     select: { carId: true },
   });

@@ -7,6 +7,7 @@ import {
   logOutEverywhere,
   updateProfile,
 } from "@/app/actions/account";
+import PhoneInput from "@/components/PhoneInput/PhoneInput";
 import styles from "@/styles/panel.module.scss";
 
 function Status({ state }) {
@@ -21,6 +22,10 @@ function Status({ state }) {
 
 export function ProfileForm({ user }) {
   const [state, action, pending] = useActionState(updateProfile, null);
+  // After an error, keep what was typed (React resets the form).
+  const values = state?.ok === false && state.values ? state.values : null;
+  const username = values?.username ?? user.username;
+  const phone = values?.phone || user.phone;
 
   return (
     <section className={styles.card}>
@@ -30,8 +35,9 @@ export function ProfileForm({ user }) {
         <label className={styles.field}>
           <span>Username</span>
           <input
+            key={`username-${username}`}
             name="username"
-            defaultValue={user.username}
+            defaultValue={username}
             autoComplete="username"
             minLength={3}
             maxLength={32}
@@ -39,16 +45,10 @@ export function ProfileForm({ user }) {
           />
         </label>
 
-        <label className={styles.field}>
-          <span>Phone number</span>
-          <input
-            name="phone"
-            type="tel"
-            defaultValue={user.phone}
-            autoComplete="tel"
-            required
-          />
-        </label>
+        <div className={styles.field}>
+          <label htmlFor="profile-phone">Phone number</label>
+          <PhoneInput key={`phone-${phone}`} id="profile-phone" defaultValue={phone} />
+        </div>
 
         <Status state={state} />
 

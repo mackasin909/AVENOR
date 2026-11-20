@@ -25,7 +25,7 @@ export default async function NewListingPage() {
           blobMode={getBlobMode()}
           uploadPrefix={blobUploadPrefix(user.id)}
           cancelHref="/my-listings"
-          note="Your listing will appear in the catalog after our team approves it. Buyers will contact you on WhatsApp at your account phone number."
+          note="Your listing will appear in the catalog after our team approves it. Buyers' messages appear in Inquiries; logged-in buyers can also message you on WhatsApp at your account phone number."
         />
       </div>
     </div>

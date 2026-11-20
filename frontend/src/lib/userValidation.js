@@ -5,14 +5,11 @@ export const PASSWORD_MIN = 8;
 export const PASSWORD_MAX = 128;
 
 export const USERNAME_ERROR = "Username must be 3–32 characters: letters, digits, _ . -";
-export const PHONE_ERROR = "Enter a valid phone number";
+export const PHONE_ERROR = "Enter a valid phone number for the chosen country";
 export const PASSWORD_ERROR = `Password must be at least ${PASSWORD_MIN} characters`;
 
-// Digits only, 7–15 long (E.164 without "+"), or null.
-export function normalizePhone(value) {
-  const digits = String(value ?? "").replace(/\D/g, "");
-  return digits.length >= 7 && digits.length <= 15 ? digits : null;
-}
+// Valid phone number (any country) → E.164 digits without "+", or null.
+export { normalizePhone } from "@/lib/phone";
 
 export function isValidUsername(value) {
   return USERNAME_RE.test(String(value ?? ""));

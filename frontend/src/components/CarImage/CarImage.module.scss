@@ -216,3 +216,85 @@
 .wrapper .mainImage {
   cursor: zoom-in;
 }
+
+// "+N" on the last thumbnail when the car has more than 5 photos.
+.thumbButton {
+  position: relative;
+}
+
+.more {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  pointer-events: none;
+}
+
+// Full-screen viewer: arrows and "3 / 8".
+.viewerArrow {
+  position: absolute;
+  top: 50%;
+  width: 52px;
+  height: 52px;
+  margin-top: -26px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 34px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+}
+
+.viewerPrev {
+  left: 20px;
+}
+
+.viewerNext {
+  right: 20px;
+}
+
+.viewerCount {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 600px) {
+  .viewerArrow {
+    top: auto;
+    bottom: 10px;
+    width: 44px;
+    height: 44px;
+    margin-top: 0;
+    font-size: 28px;
+  }
+
+  .viewerPrev {
+    left: 16px;
+  }
+
+  .viewerNext {
+    right: 16px;
+  }
+
+  .viewerCount {
+    bottom: 22px;
+  }
+}

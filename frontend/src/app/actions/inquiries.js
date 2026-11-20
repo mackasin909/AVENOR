@@ -4,6 +4,8 @@ import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { isValidEmail } from "@/lib/validation";
+import { TOO_MANY, getClientIp, isRateLimited } from "@/lib/rateLimit";
+import { whatsAppPhoneFor } from "@/lib/whatsapp";
 
 const LIMITS = {
   name: { min: 2, max: 80 },
@@ -16,12 +18,6 @@ function readText(formData, key) {
 
 function inRange(value, { min, max }) {
   return value.length >= min && value.length <= max;
-}
-
-// Dealer WhatsApp number from .env, digits only (e.g. 79991234567).
-function getWhatsAppPhone() {
-  const digits = String(process.env.WHATSAPP_PHONE ?? "").replace(/\D/g, "");
-  return digits.length >= 7 && digits.length <= 15 ? digits : null;
 }
 
 async function getSiteOrigin() {
@@ -73,6 +69,12 @@ export async function createInquiry(_previousState, formData) {
     return { ok: false, errors };
   }
 
+  // Against spam: a few inquiries per visitor every 10 minutes.
+  const ip = await getClientIp();
+  if (await isRateLimited(`inquiry:ip:${ip}`, { limit: 5, windowMs: 10 * 60 * 1000 })) {
+    return { ok: false, errors: { form: TOO_MANY } };
+  }
+
   const car = Number.isInteger(carId) && carId > 0
     ? await prisma.car.findUnique({
         where: { id: carId },
@@ -83,6 +85,7 @@ export async function createInquiry(_previousState, formData) {
           model: true,
           price: true,
           status: true,
+          ownerId: true,
           owner: { select: { phone: true } },
         },
       })
@@ -99,8 +102,12 @@ export async function createInquiry(_previousState, formData) {
     select: { id: true },
   });
 
-  // User listings go to the seller, dealer cars to the dealer number.
-  const phone = car.owner?.phone ?? getWhatsAppPhone();
+  // Dealer cars go to the dealer number; user listings to the seller,
+  // for logged-in buyers only (see lib/whatsapp.js).
+  const phone = whatsAppPhoneFor(
+    { ownerId: car.ownerId, ownerPhone: car.owner?.phone },
+    user
+  );
   let whatsappUrl = null;
 
   if (phone) {

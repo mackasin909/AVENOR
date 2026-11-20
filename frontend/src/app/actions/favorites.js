@@ -21,10 +21,16 @@ export async function toggleFavorite(carId) {
   if (existing) {
     await prisma.favorite.delete({ where: key });
   } else {
-    const car = await prisma.car.findUnique({ where: { id }, select: { id: true } });
-    if (!car) return { ok: false, error: "invalid car" };
+    // Only cars from the catalog can be saved.
+    const car = await prisma.car.findUnique({ where: { id }, select: { status: true } });
+    if (car?.status !== "approved") return { ok: false, error: "invalid car" };
 
-    await prisma.favorite.create({ data: { userId: user.id, carId: id } });
+    try {
+      await prisma.favorite.create({ data: { userId: user.id, carId: id } });
+    } catch (error) {
+      // A double click saved it a moment ago: already a favorite.
+      if (error?.code !== "P2002") throw error;
+    }
   }
 
   return {

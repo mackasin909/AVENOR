@@ -29,10 +29,14 @@ export default function HeaderField({
 
   function goToCatalog(query) {
     if (pathname === "/") {
-      router.replace(
-        query ? `/?search=${encodeURIComponent(query)}` : "/",
-        { scroll: false }
-      );
+      // Keep the filters and sort; a new search starts from page 1.
+      const params = new URLSearchParams(searchParams.toString());
+      if (query) params.set("search", query);
+      else params.delete("search");
+      params.delete("page");
+
+      const next = params.toString();
+      router.replace(next ? `/?${next}` : "/", { scroll: false });
       return;
     }
 

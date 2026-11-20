@@ -28,9 +28,15 @@ export async function updateProfile(_previousState, formData) {
 
   const username = String(formData.get("username") ?? "").trim();
   const phone = normalizePhone(formData.get("phone"));
+  // Shown again in the form after an error.
+  const values = {
+    username: String(formData.get("username") ?? ""),
+    phone: String(formData.get("phone") ?? ""),
+  };
+  const fail = (error) => ({ ok: false, error, values });
 
-  if (!isValidUsername(username)) return { ok: false, error: USERNAME_ERROR };
-  if (!phone) return { ok: false, error: PHONE_ERROR };
+  if (!isValidUsername(username)) return fail(USERNAME_ERROR);
+  if (!phone) return fail(PHONE_ERROR);
 
   const taken = await prisma.user.findFirst({
     where: {
@@ -41,19 +47,23 @@ export async function updateProfile(_previousState, formData) {
   });
 
   if (taken) {
-    return {
-      ok: false,
-      error:
-        taken.username === username
-          ? "This username is already taken"
-          : "Another account already uses this phone",
-    };
+    return fail(
+      taken.username === username
+        ? "This username is already taken"
+        : "Another account already uses this phone"
+    );
   }
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { username, phone },
-  });
+  try {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { username, phone },
+    });
+  } catch (error) {
+    // Taken by another account a moment ago.
+    if (error?.code === "P2002") return fail("This username or phone number is already taken");
+    throw error;
+  }
 
   refresh();
   return { ok: true, message: "Profile updated" };

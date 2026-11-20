@@ -15,7 +15,14 @@ export default function ListingActions({ car, editHref, isAdmin = false }) {
 
   function run(task, successMessage) {
     startTransition(async () => {
-      const result = await task();
+      let result;
+      try {
+        result = await task();
+      } catch (error) {
+        // Network or server failure: a message instead of an error page.
+        console.error(error);
+        result = { ok: false, error: "Something went wrong, please try again" };
+      }
       if (result?.ok) {
         toast.success(successMessage);
         setRejecting(false);

@@ -114,3 +114,11 @@ model Inquiry {
   @@index([carId])
   @@index([createdAt])
 }
+
+// Counters for limiting repeated requests (log in, sign up, inquiries)
+// per phone number or IP address within a time window.
+model RateLimit {
+  key     String   @id
+  count   Int
+  resetAt DateTime
+}

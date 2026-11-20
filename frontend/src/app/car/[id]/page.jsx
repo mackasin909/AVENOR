@@ -7,12 +7,28 @@ import RecordView from "@/components/RecentlyViewed/RecordView";
 import styles from "./page.module.scss";
 import CarImage from "@/components/CarImage/CarImage";
 import CarForm from "@/components/CarForm/CarForm";
+import { getDealerWhatsApp } from "@/lib/whatsapp";
+
+async function loadCar(params) {
+  const { id } = await params;
+  const viewer = await getCurrentUser();
+  return { viewer, car: await getCarById(Number(id), viewer) };
+}
+
+export async function generateMetadata({ params }) {
+  const { car } = await loadCar(params);
+  if (!car) return { title: "Car not found — AVENOR" };
+
+  const price = `$${Number(car.price).toLocaleString("en-US")}`;
+  return {
+    title: `${car.year} ${car.name} — ${price} — AVENOR`,
+    description: `${car.year} ${car.name}, ${Number(car.mileage).toLocaleString("en-US")} mi, ${car.location}. ${price}.`,
+    openGraph: car.images[0] ? { images: [car.images[0]] } : undefined,
+  };
+}
 
 export default async function ProductPage({ params }) {
-  const { id } = await params;
-
-  const viewer = await getCurrentUser();
-  const car = await getCarById(Number(id), viewer);
+  const { viewer, car } = await loadCar(params);
 
   if (!car) {
     notFound();
@@ -72,7 +88,13 @@ export default async function ProductPage({ params }) {
               </div>
             </div>
           </div>
-          {isPublic ? <CarForm carId={car.id} /> : null}
+          {isPublic ? (
+            <CarForm
+              carId={car.id}
+              hasWhatsApp={car.ownerId === null ? Boolean(getDealerWhatsApp()) : Boolean(viewer)}
+              loginForWhatsApp={car.ownerId !== null && !viewer}
+            />
+          ) : null}
         </div>
 
         {similar.length > 0 && (

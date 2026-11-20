@@ -236,6 +236,31 @@ export async function saveCar(_previousState, formData) {
   redirect(listPath(user));
 }
 
+// Photos the browser uploaded for a save that then failed half way (e.g.
+// the 3rd of 5 uploads broke): removed so they do not stay in the store.
+// Only this user's own files that no listing uses are deleted.
+export async function discardUploads(urls) {
+  const user = await getCurrentUser();
+  if (!user || !Array.isArray(urls)) return { ok: false };
+
+  const own = [...new Set(urls.map(String))]
+    .slice(0, MAX_IMAGES_PER_CAR)
+    .filter((url) => isOwnBlobUrl(url, user.id));
+  if (own.length === 0) return { ok: true };
+
+  const used = new Set(
+    (
+      await prisma.carImage.findMany({
+        where: { url: { in: own } },
+        select: { url: true },
+      })
+    ).map((image) => image.url)
+  );
+
+  await deleteUploadedImages(own.filter((url) => !used.has(url)));
+  return { ok: true };
+}
+
 export async function deleteCar(carId) {
   const user = await getCurrentUser();
   if (!user) return { ok: false, error: "Please log in again" };
@@ -267,10 +292,19 @@ export async function setCarStatus(carId, status, note = "") {
   const statusNote =
     status === "rejected" ? String(note ?? "").trim().slice(0, 500) || null : null;
 
-  await prisma.car.update({
-    where: { id: Number(carId) },
-    data: { status, statusNote },
-  });
+  try {
+    await prisma.car.update({
+      where: { id: Number(carId) },
+      data: { status, statusNote },
+    });
+  } catch (error) {
+    // Deleted in another tab or by another admin.
+    if (error?.code === "P2025") {
+      refresh();
+      return { ok: false, error: "This listing no longer exists" };
+    }
+    throw error;
+  }
 
   refresh();
   return { ok: true };

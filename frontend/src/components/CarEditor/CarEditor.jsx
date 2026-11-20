@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useActionState, useState } from "react";
-import { saveCar } from "@/app/actions/cars";
+import { discardUploads, saveCar } from "@/app/actions/cars";
 import { FUEL_TYPES } from "@/lib/catalogParams";
 import styles from "@/styles/panel.module.scss";
 
@@ -60,6 +60,7 @@ export default function CarEditor({
     } else {
       if (files.length > 0) {
         setUploading(true);
+        const uploaded = [];
         try {
           const { upload, uploadPresigned } = await import("@vercel/blob/client");
           const send = blobMode === "presigned" ? uploadPresigned : upload;
@@ -70,10 +71,13 @@ export default function CarEditor({
               handleUploadUrl: "/api/upload",
               contentType: file.type,
             });
+            uploaded.push(blob.url);
             formData.append("uploadedImage", blob.url);
           }
         } catch (error) {
           console.error("Photo upload failed", error);
+          // The photos that did upload are not used: remove them.
+          if (uploaded.length > 0) discardUploads(uploaded).catch(() => {});
           return {
             ok: false,
             errors: { photos: error?.message || "Could not upload photos" },
