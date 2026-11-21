@@ -11,7 +11,12 @@ function countryFrom(location: string) {
 
 async function main() {
   for (const { id, images, ...car } of CARS_DATA) {
-    const data = { ...car, country: countryFrom(car.location) };
+    const data = {
+      ...car,
+      // Set on every run, so a re-seed also clears it on the other cars.
+      priceOnRequest: car.priceOnRequest ?? false,
+      country: countryFrom(car.location),
+    };
     const imageRows = images.map((url: string, position: number) => ({
       url,
       position,

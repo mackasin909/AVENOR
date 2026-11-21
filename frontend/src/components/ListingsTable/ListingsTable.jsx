@@ -1,5 +1,6 @@
 import ListingActions from "@/components/ListingActions/ListingActions";
 import styles from "@/styles/panel.module.scss";
+import { formatPrice } from "@/lib/carDetails";
 
 const dateFormat = new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" });
 
@@ -37,7 +38,7 @@ export default function ListingsTable({ cars, isAdmin = false, editBase }) {
                 <div className={styles.muted}>{car.location}</div>
               </td>
               <td data-label="Price" className={styles.cellNowrap}>
-                $ {car.price.toLocaleString("en-US")}
+                {formatPrice(car, { spaced: true })}
               </td>
               {isAdmin && <td data-label="Seller">{car.ownerName ?? "Dealer"}</td>}
               <td data-label="Status">

@@ -47,6 +47,8 @@ export default function RecentlyViewed({ excludeId = null, limit = 4 }) {
               name={car.name}
               year={car.year}
               price={car.price}
+              priceOnRequest={car.priceOnRequest}
+              isNew={car.isNew}
               location={car.location}
               images={car.images}
               className="col-3"

@@ -10,6 +10,7 @@ export const SORT_OPTIONS = [
   { value: "year_desc", label: "Year: newest first" },
   { value: "year_asc", label: "Year: oldest first" },
   { value: "mileage_asc", label: "Mileage: lowest first" },
+  { value: "mileage_desc", label: "Mileage: highest first" },
 ];
 
 export const DEFAULT_SORT = "featured";

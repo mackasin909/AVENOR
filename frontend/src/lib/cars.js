@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { cache } from "react";
 import { PAGE_SIZE } from "@/lib/catalogParams";
 import { correctWord, tokenize } from "@/lib/fuzzy";
+import { isNewListing } from "@/lib/carDetails";
 
 const carInclude = {
   images: {
@@ -14,14 +15,21 @@ const carInclude = {
 const PUBLIC = { status: "approved" };
 
 // Plain object shape the UI components expect.
-export function toCar(row) {
+// A hidden price ("Price on request") is left out, since cars are passed to
+// the browser; `withPrice` keeps it for the owner's and admins' screens.
+export function toCar(row, { withPrice = false } = {}) {
   const { images, createdAt, updatedAt, owner, ...car } = row;
 
   return {
     ...car,
+    price: car.priceOnRequest && !withPrice ? null : car.price,
     name: `${car.brand} ${car.model}`,
     images: images.map((image) => image.url),
     createdAt: createdAt?.toISOString?.() ?? null,
+    updatedAt: updatedAt?.toISOString?.() ?? null,
+    // Decided here, once: the browser's clock could disagree near the end
+    // of the week and change the card while it loads.
+    isNew: isNewListing(createdAt),
   };
 }
 
@@ -34,11 +42,13 @@ export function countryFrom(location) {
 const SORT_ORDER = {
   featured: [{ id: "asc" }],
   newest: [{ createdAt: "desc" }, { id: "desc" }],
-  price_asc: [{ price: "asc" }, { id: "asc" }],
-  price_desc: [{ price: "desc" }, { id: "asc" }],
+  // Hidden prices ("Price on request") go last either way.
+  price_asc: [{ priceOnRequest: "asc" }, { price: "asc" }, { id: "asc" }],
+  price_desc: [{ priceOnRequest: "asc" }, { price: "desc" }, { id: "asc" }],
   year_desc: [{ year: "desc" }, { id: "asc" }],
   year_asc: [{ year: "asc" }, { id: "asc" }],
   mileage_asc: [{ mileage: "asc" }, { id: "asc" }],
+  mileage_desc: [{ mileage: "desc" }, { id: "asc" }],
 };
 
 function range(min, max) {
@@ -122,7 +132,8 @@ export function buildCatalogWhere(filters, words = []) {
   const price = range(filters.minPrice, filters.maxPrice);
   const mileage = range(filters.minMileage, filters.maxMileage);
   const year = range(filters.minYear, filters.maxYear);
-  if (price) and.push({ price });
+  // A price filter only matches cars that show their price.
+  if (price) and.push({ price, priceOnRequest: false });
   if (mileage) and.push({ mileage });
   if (year) and.push({ year });
 
@@ -157,7 +168,7 @@ export async function searchCatalog(filters) {
 
 // Options and bounds for the filter panel (approved cars only).
 export async function getCatalogFacets() {
-  const [options, bounds] = await Promise.all([
+  const [options, bounds, priceBounds] = await Promise.all([
     prisma.car.findMany({
       where: PUBLIC,
       select: { brand: true, model: true, country: true, fuelType: true },
@@ -165,20 +176,26 @@ export async function getCatalogFacets() {
     }),
     prisma.car.aggregate({
       where: PUBLIC,
-      _min: { price: true, mileage: true, year: true },
-      _max: { price: true, mileage: true, year: true },
+      _min: { mileage: true, year: true },
+      _max: { mileage: true, year: true },
+    }),
+    // Hidden prices stay out of the price slider.
+    prisma.car.aggregate({
+      where: { ...PUBLIC, priceOnRequest: false },
+      _min: { price: true },
+      _max: { price: true },
     }),
   ]);
 
-  const bound = (key) =>
-    bounds._min[key] === null
+  const bound = (key, source = bounds) =>
+    source._min[key] === null
       ? null
-      : { min: bounds._min[key], max: bounds._max[key] };
+      : { min: source._min[key], max: source._max[key] };
 
   return {
     cars: options,
     fuels: [...new Set(options.map((car) => car.fuelType))].sort(),
-    priceBounds: bound("price"),
+    priceBounds: bound("price", priceBounds),
     mileageBounds: bound("mileage"),
     yearBounds: bound("year"),
   };
@@ -232,13 +249,17 @@ export async function getCarsByIds(ids) {
 
 // Same brand first, then cars closest in price (±40%).
 export async function getSimilarCars(car, take = 3) {
+  // The car's own price, also when it is hidden from buyers.
+  const { price } =
+    (await prisma.car.findUnique({ where: { id: car.id }, select: { price: true } })) ?? car;
+
   const rows = await prisma.car.findMany({
     where: {
       ...PUBLIC,
       id: { not: car.id },
       OR: [
         { brand: car.brand },
-        { price: { gte: Math.round(car.price * 0.6), lte: Math.round(car.price * 1.4) } },
+        { price: { gte: Math.round(price * 0.6), lte: Math.round(price * 1.4) } },
       ],
     },
     include: carInclude,
@@ -250,7 +271,7 @@ export async function getSimilarCars(car, take = 3) {
       const brandA = a.brand === car.brand ? 0 : 1;
       const brandB = b.brand === car.brand ? 0 : 1;
       if (brandA !== brandB) return brandA - brandB;
-      return Math.abs(a.price - car.price) - Math.abs(b.price - car.price);
+      return Math.abs(a.price - price) - Math.abs(b.price - price);
     })
     .slice(0, take)
     .map(toCar);
@@ -296,7 +317,7 @@ export async function getManagedCars({ ownerId, status } = {}) {
   });
 
   return rows.map(({ _count, ...row }) => ({
-    ...toCar(row),
+    ...toCar(row, { withPrice: true }),
     ownerName: row.owner?.username ?? null,
     inquiryCount: _count.inquiries,
   }));
@@ -310,5 +331,5 @@ export async function getEditableCar(id, user) {
   if (!row) return null;
 
   const allowed = user.role === "admin" || (row.ownerId !== null && row.ownerId === user.id);
-  return allowed ? toCar(row) : null;
+  return allowed ? toCar(row, { withPrice: true }) : null;
 }

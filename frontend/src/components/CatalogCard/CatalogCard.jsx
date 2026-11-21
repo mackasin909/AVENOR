@@ -9,12 +9,15 @@ import "swiper/css";
 
 import styles from "./CatalogCard.module.scss";
 import useFavorites from "@/context/FavoritesContext";
+import { formatPrice } from "@/lib/carDetails";
 
 export default function CatalogCard({
   images = [],
   id,
   name,
   price,
+  priceOnRequest = false,
+  isNew = false,
   year,
   location,
   className = "col-4",
@@ -32,6 +35,7 @@ export default function CatalogCard({
   return (
     <div className={`${className} ${styles.catalogCard}`}>
       <div className={styles.gallery}>
+        {isNew && <span className={styles.badge}>New</span>}
         <button
           className={styles.favorite}
           type="button"
@@ -158,7 +162,7 @@ export default function CatalogCard({
 
       <Link href={`/car/${id}`} className={styles.info}>
         <p className={styles.price}>
-          $ {Number(price).toLocaleString("en-US")}
+          {formatPrice({ price, priceOnRequest }, { spaced: true })}
         </p>
 
         <h4 className={styles.name}>

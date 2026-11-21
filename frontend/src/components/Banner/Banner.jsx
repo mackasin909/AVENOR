@@ -8,6 +8,7 @@ import Link from "next/link"
 import "swiper/css"
 
 import styles from "./Banner.module.scss"
+import { formatPrice } from "@/lib/carDetails"
 
 function Arrow({ direction }) {
     return (
@@ -142,7 +143,7 @@ export default function Banner({ cars = [] }) {
                                                 </h2>
 
                                                 <p className={styles.price}>
-                                                    $ {Number(car.price).toLocaleString("en-US")}
+                                                    {formatPrice(car, { spaced: true })}
                                                 </p>
 
                                                 <p>

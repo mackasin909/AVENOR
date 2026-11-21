@@ -30,6 +30,19 @@ model Car {
   engine      String
   gearbox     String
   fuelType    String
+  // Added later: optional so older listings stay valid (shown when set).
+  bodyType       String?
+  exteriorColor  String?
+  interiorColor  String?
+  horsepower     Int?
+  // "LHD" / "RHD"
+  steering       String?
+  // "New" / "Used"
+  condition      String   @default("Used")
+  vin            String?
+  // The price is kept (for sorting / similar cars) but buyers see
+  // "Price on request".
+  priceOnRequest Boolean  @default(false)
   location    String
   country     String
   description String

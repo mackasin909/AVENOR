@@ -7,6 +7,13 @@ import { getCurrentUser } from "@/lib/auth";
 import { countryFrom } from "@/lib/cars";
 import { FUEL_TYPES } from "@/lib/catalogParams";
 import {
+  BODY_TYPES,
+  COLORS,
+  CONDITIONS,
+  STEERING_OPTIONS,
+  VIN_PATTERN,
+} from "@/lib/carDetails";
+import {
   MAX_IMAGES_PER_CAR,
   deleteUploadedImages,
   isBlobEnabled,
@@ -30,6 +37,15 @@ const NUMBER_FIELDS = {
   year: { label: "Year", min: 1900, max: MAX_YEAR },
   price: { label: "Price", min: 1, max: 1_000_000_000 },
   mileage: { label: "Mileage", min: 0, max: 2_000_000 },
+};
+
+// Choices from a fixed list (lib/carDetails.js).
+const CHOICE_FIELDS = {
+  bodyType: { label: "a body type", options: BODY_TYPES },
+  exteriorColor: { label: "an exterior color", options: COLORS },
+  interiorColor: { label: "an interior color", options: COLORS },
+  steering: { label: "the steering side", options: STEERING_OPTIONS.map((option) => option.value) },
+  condition: { label: "the condition", options: CONDITIONS },
 };
 
 function readCarFields(formData) {
@@ -57,6 +73,28 @@ function readCarFields(formData) {
   if (!FUEL_TYPES.includes(values.fuelType)) {
     errors.fuelType = "Choose a fuel type";
   }
+
+  for (const [key, rule] of Object.entries(CHOICE_FIELDS)) {
+    values[key] = String(formData.get(key) ?? "");
+    if (!rule.options.includes(values[key])) errors[key] = `Choose ${rule.label}`;
+  }
+
+  // Optional: power in hp.
+  values.horsepower = String(formData.get("horsepower") ?? "").replace(/[\s,]/g, "");
+  if (values.horsepower !== "") {
+    const hp = Number(values.horsepower);
+    if (!Number.isInteger(hp) || hp < 1 || hp > 5000) {
+      errors.horsepower = "Power must be a whole number from 1 to 5,000 hp";
+    }
+  }
+
+  // Optional: VIN, stored in capitals without spaces.
+  values.vin = String(formData.get("vin") ?? "").replace(/[\s-]/g, "").toUpperCase();
+  if (values.vin !== "" && !VIN_PATTERN.test(values.vin)) {
+    errors.vin = "A VIN has 17 letters and digits (no I, O or Q)";
+  }
+
+  values.priceOnRequest = formData.get("priceOnRequest") === "on";
 
   return { values, errors };
 }
@@ -191,6 +229,14 @@ export async function saveCar(_previousState, formData) {
     engine: values.engine,
     gearbox: values.gearbox,
     fuelType: values.fuelType,
+    bodyType: values.bodyType,
+    exteriorColor: values.exteriorColor,
+    interiorColor: values.interiorColor,
+    horsepower: values.horsepower === "" ? null : Number(values.horsepower),
+    steering: values.steering,
+    condition: values.condition,
+    vin: values.vin || null,
+    priceOnRequest: values.priceOnRequest,
     location: values.location,
     country: countryFrom(values.location),
     description: values.description,

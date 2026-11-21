@@ -4,10 +4,29 @@ import Link from "next/link";
 import { useActionState, useState } from "react";
 import { discardUploads, saveCar } from "@/app/actions/cars";
 import { FUEL_TYPES } from "@/lib/catalogParams";
+import { BODY_TYPES, COLORS, CONDITIONS, STEERING_OPTIONS } from "@/lib/carDetails";
 import styles from "@/styles/panel.module.scss";
 
 const MAX_PHOTOS = 10;
 const MAX_BYTES = 8 * 1024 * 1024;
+
+// A select that shows `value` again after a failed save: React does not
+// re-apply a select's defaultValue after the form resets, so it is rebuilt
+// (key) with the restored value.
+function Choice({ name, value, options, placeholder = "Choose…" }) {
+  return (
+    <select key={`${name}-${value ?? ""}`} name={name} defaultValue={value ?? ""} required>
+      <option value="" disabled>{placeholder}</option>
+      {options.map((option) => {
+        const { value: optionValue, label } =
+          typeof option === "string" ? { value: option, label: option } : option;
+        return (
+          <option key={optionValue} value={optionValue}>{label}</option>
+        );
+      })}
+    </select>
+  );
+}
 
 function Field({ label, error, children }) {
   return (
@@ -234,6 +253,16 @@ export default function CarEditor({
             </Field>
           </div>
 
+          <label className={styles.checkField}>
+            <input
+              key={`por-${Boolean(values.priceOnRequest)}`}
+              type="checkbox"
+              name="priceOnRequest"
+              defaultChecked={Boolean(values.priceOnRequest)}
+            />
+            Hide the price: buyers see &quot;Price on request&quot;
+          </label>
+
           <div className={styles.fieldsRow}>
             <Field label="Engine" error={errors.engine}>
               <input
@@ -254,6 +283,48 @@ export default function CarEditor({
               />
             </Field>
           </div>
+
+          <div className={styles.fieldsRow}>
+            <Field label="Body type" error={errors.bodyType}>
+              <Choice name="bodyType" value={values.bodyType} options={BODY_TYPES} />
+            </Field>
+            <Field label="Condition" error={errors.condition}>
+              <Choice name="condition" value={values.condition ?? "Used"} options={CONDITIONS} />
+            </Field>
+            <Field label="Steering" error={errors.steering}>
+              <Choice name="steering" value={values.steering} options={STEERING_OPTIONS} />
+            </Field>
+          </div>
+
+          <div className={styles.fieldsRow}>
+            <Field label="Exterior color" error={errors.exteriorColor}>
+              <Choice name="exteriorColor" value={values.exteriorColor} options={COLORS} />
+            </Field>
+            <Field label="Interior color" error={errors.interiorColor}>
+              <Choice name="interiorColor" value={values.interiorColor} options={COLORS} />
+            </Field>
+            <Field label="Power, hp (optional)" error={errors.horsepower}>
+              <input
+                name="horsepower"
+                type="number"
+                min={1}
+                max={5000}
+                step={1}
+                defaultValue={values.horsepower ?? ""}
+              />
+            </Field>
+          </div>
+
+          <Field label="VIN (optional)" error={errors.vin}>
+            <input
+              name="vin"
+              defaultValue={values.vin ?? ""}
+              maxLength={20}
+              placeholder="17 characters"
+              autoCapitalize="characters"
+              spellCheck={false}
+            />
+          </Field>
 
           <Field label="Location (city, region, country)" error={errors.location}>
             <input

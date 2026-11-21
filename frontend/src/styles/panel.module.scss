@@ -123,6 +123,22 @@
   }
 }
 
+.checkField {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+
+  input {
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    accent-color: var(--ink);
+  }
+}
+
 .fieldsRow {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

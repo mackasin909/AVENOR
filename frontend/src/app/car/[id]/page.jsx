@@ -8,6 +8,7 @@ import styles from "./page.module.scss";
 import CarImage from "@/components/CarImage/CarImage";
 import CarForm from "@/components/CarForm/CarForm";
 import { getDealerWhatsApp } from "@/lib/whatsapp";
+import { formatDate, formatPrice, getCarDetails } from "@/lib/carDetails";
 
 async function loadCar(params) {
   const { id } = await params;
@@ -19,7 +20,7 @@ export async function generateMetadata({ params }) {
   const { car } = await loadCar(params);
   if (!car) return { title: "Car not found — AVENOR" };
 
-  const price = `$${Number(car.price).toLocaleString("en-US")}`;
+  const price = formatPrice(car);
   return {
     title: `${car.year} ${car.name} — ${price} — AVENOR`,
     description: `${car.year} ${car.name}, ${Number(car.mileage).toLocaleString("en-US")} mi, ${car.location}. ${price}.`,
@@ -55,7 +56,7 @@ export default async function ProductPage({ params }) {
                 <h2><span>{car.year}</span> {car.name}</h2>
                 <p>{car.location}</p>
               </div>
-              <h4>$ {Number(car.price).toLocaleString("en-US")}</h4>
+              <h4>{formatPrice(car, { spaced: true })}</h4>
             </div>
             <div className={styles.infoBlock}>
               <div className={styles.stats}>
@@ -75,6 +76,12 @@ export default async function ProductPage({ params }) {
                   <p>{car.gearbox}</p>
                   <span>Gearbox</span>
                 </div>
+                {car.steering && (
+                  <div>
+                    <p>{car.steering}</p>
+                    <span>Steering</span>
+                  </div>
+                )}
                 <div>
                   <p>{car.fuelType}</p>
                   <span>Fuel Type</span>
@@ -87,6 +94,25 @@ export default async function ProductPage({ params }) {
                 <p>{car.description}</p>
               </div>
             </div>
+            <div className={styles.infoBlock}>
+              <div className={styles.details}>
+                <h4>Car Details</h4>
+                <dl>
+                  {getCarDetails(car).map(({ label, value }) => (
+                    <div key={label}>
+                      <dt>{label}</dt>
+                      <dd>{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            </div>
+            <p className={styles.dates}>
+              Listed {formatDate(car.createdAt)}
+              {car.updatedAt && formatDate(car.updatedAt) !== formatDate(car.createdAt) && (
+                <> · Last updated {formatDate(car.updatedAt)}</>
+              )}
+            </p>
           </div>
           {isPublic ? (
             <CarForm
@@ -110,6 +136,8 @@ export default async function ProductPage({ params }) {
                   name={item.name}
                   year={item.year}
                   price={item.price}
+                  priceOnRequest={item.priceOnRequest}
+                  isNew={item.isNew}
                   location={item.location}
                   images={item.images}
                 />

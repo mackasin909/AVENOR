@@ -53,7 +53,7 @@
 .stats{
   display: flex;
   align-items: center;
-  column-gap: 80px;
+  column-gap: 60px;
 
   & div{
     display: flex;
@@ -85,6 +85,52 @@
   line-height: 25px;
 }
 
+
+.details {
+  width: 100%;
+
+  & h4 {
+    margin-bottom: 16px;
+    font-size: 24px;
+  }
+
+  & dl {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 40px;
+  }
+
+  & dl > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 16px;
+  }
+
+  & dt {
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  & dd {
+    font-weight: 600;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+}
+
+.dates {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+@media (max-width: 700px) {
+  .details dl {
+    grid-template-columns: 1fr;
+  }
+}
 
 .notice {
   margin-bottom: 20px;

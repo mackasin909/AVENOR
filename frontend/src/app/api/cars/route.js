@@ -13,11 +13,14 @@ export async function GET(request) {
   const cars = await getCarsByIds(ids);
 
   return Response.json(
-    cars.map(({ id, name, year, price, location, images }) => ({
+    cars.map(({ id, name, year, price, priceOnRequest, isNew, location, images }) => ({
       id,
       name,
       year,
-      price,
+      // A hidden price is not sent at all.
+      price: priceOnRequest ? null : price,
+      priceOnRequest,
+      isNew,
       location,
       images,
     }))

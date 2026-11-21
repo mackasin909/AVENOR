@@ -47,6 +47,8 @@ export default function CatalogResults({
                 images={car.images}
                 name={car.name}
                 price={car.price}
+                priceOnRequest={car.priceOnRequest}
+                isNew={car.isNew}
               />
             ))}
           </div>

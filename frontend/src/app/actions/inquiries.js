@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { isValidEmail } from "@/lib/validation";
 import { TOO_MANY, getClientIp, isRateLimited } from "@/lib/rateLimit";
 import { whatsAppPhoneFor } from "@/lib/whatsapp";
+import { formatPrice } from "@/lib/carDetails";
 
 const LIMITS = {
   name: { min: 2, max: 80 },
@@ -37,7 +38,7 @@ function buildWhatsAppText({ car, name, email, message, carUrl, inquiryId }) {
     `New inquiry #${inquiryId} — AVENOR`,
     "",
     `Car: ${car.year} ${car.brand} ${car.model}`,
-    `Price: $${car.price.toLocaleString("en-US")}`,
+    `Price: ${formatPrice(car)}`,
     carUrl ? `Link: ${carUrl}` : null,
     "",
     `Name: ${name}`,
@@ -84,6 +85,7 @@ export async function createInquiry(_previousState, formData) {
           brand: true,
           model: true,
           price: true,
+          priceOnRequest: true,
           status: true,
           ownerId: true,
           owner: { select: { phone: true } },
